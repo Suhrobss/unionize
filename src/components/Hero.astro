@@ -7,13 +7,21 @@
 // прокрутки, проявляється плашка з назвою гри й переходами.
 //
 // Без WebGL працює 2D-фолбек; без JavaScript видно постер і плашку одразу.
+import { u } from "../config/paths.js";
+
 const SOLID = "UNION".split("");
 const OUTLINE = "IZE".split("");
 ---
 
 <section class="hero3d" id="hero" data-phase="static">
   <div class="hero3d__stage" data-hero-stage>
-    <div class="hero3d__poster" data-hero-poster aria-hidden="true"></div>
+    {/* шлях до постера йде змінною: у CSS префікс бази не підставиш */}
+    <div
+      class="hero3d__poster"
+      data-hero-poster
+      aria-hidden="true"
+      style={`--poster: url("${u("/images/hero/poster.webp")}")`}
+    ></div>
     <canvas class="hero3d__canvas" data-hero-canvas aria-hidden="true"></canvas>
 
     <div class="hero3d__vignette" aria-hidden="true"></div>
@@ -63,8 +71,8 @@ const OUTLINE = "IZE".split("");
 
       <div class="hero3d__actions">
         <a href="#goal" class="btn-brass">Дізнатися про гру</a>
-        <a href="/rules" class="btn-outline">Правила</a>
-        <a href="/archetype" class="btn-outline">Пройти тест</a>
+        <a href={u("/rules")} class="btn-outline">Правила</a>
+        <a href={u("/archetype")} class="btn-outline">Пройти тест</a>
       </div>
     </div>
   </div>
@@ -168,7 +176,7 @@ const OUTLINE = "IZE".split("");
   .hero3d__poster {
     position: absolute;
     inset: 0;
-    background: var(--ink-800) url("/images/hero/poster.webp") center / cover no-repeat;
+    background: var(--ink-800) var(--poster) center / cover no-repeat;
     transition: opacity 700ms ease;
   }
 

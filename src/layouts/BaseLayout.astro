@@ -7,11 +7,13 @@ import Lighthouse from "../components/Lighthouse.astro";
 import FloatingCTA from "../components/FloatingCTA.astro";
 import ScrollTopButton from "../components/ScrollTopButton.astro";
 import { SITE_URL, SITE_NAME } from "../config/site.js";
+import { u } from "../config/paths.js";
 
 const { title, description, ogImage = "/og-default.png" } = Astro.props;
 
-const canonicalUrl = new URL(Astro.url.pathname, SITE_URL).toString();
-const ogImageUrl = new URL(ogImage, SITE_URL).toString();
+// u() ідемпотентний, тож не важливо, чи Astro вже вклав базу в pathname
+const canonicalUrl = new URL(u(Astro.url.pathname), SITE_URL).toString();
+const ogImageUrl = new URL(u(ogImage), SITE_URL).toString();
 ---
 
 <!doctype html>
@@ -31,10 +33,10 @@ const ogImageUrl = new URL(ogImage, SITE_URL).toString();
     <meta property="og:image" content={ogImageUrl} />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
-    <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href={u("/favicon.svg")} type="image/svg+xml" />
+    <link rel="icon" href={u("/favicon-32.png")} sizes="32x32" type="image/png" />
+    <link rel="icon" href={u("/favicon-16.png")} sizes="16x16" type="image/png" />
+    <link rel="apple-touch-icon" href={u("/apple-touch-icon.png")} />
   </head>
   <body>
     <Header />

@@ -1,4 +1,5 @@
 ---
+import { u } from "../../config/paths.js";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import GravureScale from "../../components/instrument/GravureScale.astro";
 import archetypesData from "../../../data/archetype-questions.json";
@@ -35,7 +36,7 @@ const scales: { axis: string; pole: string }[] = [
 >
   <section class="a-static">
     <div class="container">
-      <a href="/archetype" class="btn-brass a-static__cta-top">Пройти й дізнатись свій профіль</a>
+      <a href={u("/archetype")} class="btn-brass a-static__cta-top">Пройти й дізнатись свій профіль</a>
 
       <p class="label a-static__eyebrow">Типовий профіль</p>
       <h1 class="a-static__name">{archetype.name}</h1>
@@ -87,13 +88,13 @@ const scales: { axis: string; pole: string }[] = [
           {ally && (
             <div class="a-pair-card a-pair-card--ally">
               <p class="label">Союзник</p>
-              <a href={`/archetype/${ally.slug}`}>{ally.name}</a>
+              <a href={u(`/archetype/${ally.slug}`)}>{ally.name}</a>
             </div>
           )}
           {opponent && (
             <div class="a-pair-card a-pair-card--opponent">
               <p class="label">Опонент</p>
-              <a href={`/archetype/${opponent.slug}`}>{opponent.name}</a>
+              <a href={u(`/archetype/${opponent.slug}`)}>{opponent.name}</a>
             </div>
           )}
         </div>
@@ -105,7 +106,7 @@ const scales: { axis: string; pole: string }[] = [
         <a href={JOIN_FORM_URL} target="_blank" rel="noopener" class="btn-brass">Стати частиною ПРМТУ</a>
       </div>
 
-      <a href="/archetype" class="btn-brass a-static__cta-bottom">Пройти й дізнатись свій профіль</a>
+      <a href={u("/archetype")} class="btn-brass a-static__cta-bottom">Пройти й дізнатись свій профіль</a>
     </div>
   </section>
 </BaseLayout>

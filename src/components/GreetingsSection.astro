@@ -1,4 +1,5 @@
 ---
+import { u } from "../config/paths.js";
 // Тексти — з docs/Unionize правила.txt, розділ "Вітальні слова" (актуальна
 // редакція з назвою Unionize). Емодзі — з reference/index.html, де вони
 // збережені коректно (у вихідному .txt кодування зіпсувало ці символи).
@@ -6,7 +7,7 @@
 // голос людей, а не інтерфейс.
 const PEOPLE = [
   {
-    photo: "/images/people/oleg.jpg",
+    photo: u("/images/people/oleg.jpg"),
     name: "Олег ГРИГОРЮК",
     role: "Голова ПРМТУ · Амбасадор доброї волі IMO · Віце-президент IFSMA",
     paragraphs: [
@@ -16,7 +17,7 @@ const PEOPLE = [
     ],
   },
   {
-    photo: "/images/people/iryna.jpg",
+    photo: u("/images/people/iryna.jpg"),
     name: "Ірина ЄРІНЕНКО",
     role: "Голова Молодіжної ради · юрист ПРМТУ · співрозробник Unionize",
     paragraphs: [
@@ -26,7 +27,7 @@ const PEOPLE = [
     ],
   },
   {
-    photo: "/images/people/suhrob.jpg",
+    photo: u("/images/people/suhrob.jpg"),
     name: "Сухроб СОБІРОВ",
     role: "Юрист ПРМТУ · розробник Unionize",
     paragraphs: [

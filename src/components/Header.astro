@@ -1,19 +1,25 @@
 ---
 import { NAV_ITEMS } from "../config/nav.js";
+import { u } from "../config/paths.js";
 
-const path = Astro.url.pathname;
-const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
+// Порівнюємо вже з префіксом бази, інакше в підпапці активним завжди
+// виглядав би перший пункт.
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+const isActive = (href: string) => {
+  const full = u(href).replace(/\/$/, "") || "/";
+  return full === "/" ? path === u("/").replace(/\/$/, "") || path === "/" : path.startsWith(full);
+};
 ---
 
 <header class="header" id="site-header">
   <div class="header__bar container">
-    <a href="/" class="header__logo">UNIONIZE</a>
+    <a href={u("/")} class="header__logo">UNIONIZE</a>
 
     <nav class="header__nav" aria-label="Основна навігація">
       <ul>
         {NAV_ITEMS.map((item) => (
           <li>
-            <a href={item.href} class="header__link" aria-current={isActive(item.href) ? "page" : undefined}>
+            <a href={u(item.href)} class="header__link" aria-current={isActive(item.href) ? "page" : undefined}>
               {item.label}
             </a>
           </li>
@@ -34,7 +40,7 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
   <ul>
     {NAV_ITEMS.map((item) => (
       <li>
-        <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>{item.label}</a>
+        <a href={u(item.href)} aria-current={isActive(item.href) ? "page" : undefined}>{item.label}</a>
       </li>
     ))}
   </ul>

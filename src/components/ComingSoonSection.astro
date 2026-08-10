@@ -1,4 +1,5 @@
 ---
+import { u } from "../config/paths.js";
 interface Props {
   eyebrow: string;
   title: string;
@@ -12,7 +13,7 @@ const { eyebrow, title, text } = Astro.props;
     <p class="label coming-soon__eyebrow">{eyebrow}</p>
     <h1 class="coming-soon__title">{title}</h1>
     <p class="coming-soon__text">{text}</p>
-    <a href="/rules" class="coming-soon__link">Тим часом — правила гри →</a>
+    <a href={u("/rules")} class="coming-soon__link">Тим часом — правила гри →</a>
   </div>
 </section>
 

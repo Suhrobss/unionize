@@ -96,7 +96,9 @@ export function createDice(scene, fx, castShadow) {
       state: "hidden", // hidden | flying | settling | rest
       settleFrom: null,
       settleTo: null,
+      settlePos: null,
       settleStart: 0,
+      result: 1,
       firstImpactDone: false,
     };
   });

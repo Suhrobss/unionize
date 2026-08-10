@@ -34,6 +34,7 @@ import {
   WebGLRenderer,
 } from "three";
 import { easeOutCubic, clamp01 } from "./easing.js";
+import { u } from "../config/paths.js";
 
 export const BOARD_TOP_Y = 0.09; // BoxGeometry(10,.18,10) із центром в origin
 
@@ -123,7 +124,7 @@ export function createScene(canvas, profile) {
     // board-tex.jpg — оптимізована 1280px-версія board.jpg (оригінал 11,5 МБ
     // непридатний як текстура: одне завантаження з'їдає весь бюджет швидкості)
     new TextureLoader().load(
-      "/images/board/board-tex.jpg",
+      u("/images/board/board-tex.jpg"),
       (tex) => {
         tex.colorSpace = SRGBColorSpace;
         tex.anisotropy = renderer.capabilities.getMaxAnisotropy();

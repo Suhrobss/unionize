@@ -13,6 +13,7 @@ import {
   Vector3,
 } from "three";
 import { easeSite, clamp01 } from "./easing.js";
+import { u } from "../config/paths.js";
 
 const START = new Vector3(3.2, 2.8, 3.4);
 const END = new Vector3(2.1, 0.1, 1.4);
@@ -71,7 +72,7 @@ export function createCard(scene, fx, castShadow) {
   const backMat = new MeshStandardMaterial({ map: backTex, roughness: 0.7 });
 
   new TextureLoader().load(
-    "/images/hero/card-face.webp",
+    u("/images/hero/card-face.webp"),
     (tex) => {
       tex.colorSpace = SRGBColorSpace;
       faceMat.map = tex;

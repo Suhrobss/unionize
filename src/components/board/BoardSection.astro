@@ -1,4 +1,5 @@
 ---
+import { u } from "../../config/paths.js";
 import Modal from "../Modal.astro";
 import { CELL_TYPE_ORDER, CELL_TYPES } from "../../config/cellTypes.js";
 ---
@@ -18,7 +19,7 @@ import { CELL_TYPE_ORDER, CELL_TYPES } from "../../config/cellTypes.js";
               для показу в макеті непридатний; повний масштаб — у режимі
               «Дивитись поле», де вантажиться board-lg.jpg */}
           <img
-            src="/images/board/board-tex.jpg"
+            src={u("/images/board/board-tex.jpg")}
             alt="Ігрове поле Unionize"
             class="board-visual__img"
             width="1280"
@@ -57,7 +58,7 @@ import { CELL_TYPE_ORDER, CELL_TYPES } from "../../config/cellTypes.js";
   <div class="board-fullscreen__viewport" id="board-fullscreen-viewport">
     <div class="board-fullscreen__stage" id="board-fullscreen-stage">
       <img
-        src="/images/board/board-lg.jpg"
+        src={u("/images/board/board-lg.jpg")}
         alt="Ігрове поле Unionize"
         class="board-fullscreen__img"
         width="2000"

@@ -1,4 +1,5 @@
 ---
+import { u } from "../../config/paths.js";
 import GravureScale from "../instrument/GravureScale.astro";
 ---
 
@@ -108,7 +109,7 @@ import GravureScale from "../instrument/GravureScale.astro";
       <div class="a-result__block a-result__actions">
         <button type="button" class="btn-brass" id="r-share">Поділитись у сторіз</button>
         <button type="button" class="btn-outline" id="r-retry">Пройти ще раз</button>
-        <a href="/rules" class="a-result__learn">Дізнатись про гру</a>
+        <a href={u("/rules")} class="a-result__learn">Дізнатись про гру</a>
       </div>
     </div>
   </div>

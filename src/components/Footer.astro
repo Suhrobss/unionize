@@ -1,4 +1,5 @@
 ---
+import { u } from "../config/paths.js";
 import { FOOTER_LINKS } from "../config/links.js";
 ---
 
@@ -25,7 +26,7 @@ import { FOOTER_LINKS } from "../config/links.js";
 
   <div class="footer__bottom container">
     <p class="label">© 2026 Unionize · ПРМТУ</p>
-    <a href="/tasks" class="label footer__tasks-link">Додаткова можливість →</a>
+    <a href={u("/tasks")} class="label footer__tasks-link">Додаткова можливість →</a>
   </div>
 </footer>
 
