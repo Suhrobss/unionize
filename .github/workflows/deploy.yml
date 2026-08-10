@@ -37,11 +37,11 @@ jobs:
       - name: Зібрати сайт
         run: npm run build
 
+      # Pages вмикається один раз вручну: Settings → Pages → Source → GitHub
+      # Actions. Автовмикання (enablement: true) тут не використовуємо — на
+      # нових акаунтах GitHub не дає робочому процесу таких прав, і крок падає.
       - name: Підготувати GitHub Pages
         uses: actions/configure-pages@v5
-        with:
-          # вмикає Pages у налаштуваннях репозиторію автоматично
-          enablement: true
 
       - name: Завантажити збірку
         uses: actions/upload-pages-artifact@v3
