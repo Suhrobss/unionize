@@ -1,0 +1,179 @@
+---
+import InstrumentPanel from "./instrument/InstrumentPanel.astro";
+import PaperLedger from "./instrument/PaperLedger.astro";
+---
+
+<section class="calculator" id="calculator">
+  <div class="container">
+    <h2 class="calculator__title">Калькулятор UC & рейтингу</h2>
+    <p class="calculator__lede">
+      Формула не змінюється: <strong>рейтинг × 100 + UC + вартість ППО</strong>. Порахуйте зараз — цифри
+      з'являються одразу під час набору, а кнопка «Розрахувати» фіксує підсумок.
+    </p>
+
+    <div data-reveal>
+    <InstrumentPanel label="Калькулятор UC & рейтингу">
+      <form class="calc-form" id="calc-form">
+        <PaperLedger title="Відомість активів гравця" totalLabel="Разом активів">
+          <div class="ledger__row">
+            <label class="ledger__row-label" for="calc-rating">Соціальний рейтинг</label>
+            <input class="calc-input" type="number" inputmode="numeric" id="calc-rating" name="rating" placeholder="15" />
+          </div>
+          <p class="ledger__row-note">× 100 UnionCoin</p>
+          <div class="ledger__row">
+            <label class="ledger__row-label" for="calc-uc">UnionCoin на руках</label>
+            <input class="calc-input" type="number" inputmode="numeric" min="0" id="calc-uc" name="uc" placeholder="5000" />
+          </div>
+          <div class="ledger__row">
+            <label class="ledger__row-label" for="calc-ppo">Номінальна вартість ППО</label>
+            <input class="calc-input" type="number" inputmode="numeric" min="0" id="calc-ppo" name="ppo" placeholder="6000" />
+          </div>
+          <span slot="total" id="calc-total" aria-live="polite">0</span>
+          <p slot="warning" class="ledger__warning" id="calc-warning" hidden>
+            Рейтинг нижче нуля — гравець поза фінальним підрахунком
+          </p>
+        </PaperLedger>
+
+        <button type="submit" class="btn-brass calc-submit">Розрахувати</button>
+      </form>
+    </InstrumentPanel>
+    </div>
+  </div>
+</section>
+
+<style>
+  .calculator {
+    padding-block: var(--space-16);
+  }
+
+  @media (min-width: 861px) {
+    .calculator {
+      padding-block: var(--space-32);
+    }
+  }
+
+  .calculator__title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 6vw, 4rem);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+    margin-bottom: var(--space-4);
+  }
+
+  .calculator__lede {
+    max-width: 60ch;
+    color: var(--steel);
+    margin-bottom: var(--space-8);
+  }
+
+  .calc-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  .calc-input {
+    width: 145px;
+    padding: 4px 0;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--paper-ink);
+    border-radius: 0;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 18px;
+    text-align: right;
+    color: var(--paper-ink);
+  }
+
+  .calc-input:focus {
+    outline: none;
+    background: rgba(228, 210, 166, .55);
+    border-bottom-color: var(--brass);
+  }
+
+  .ledger__warning {
+    margin-top: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--paper-neg);
+  }
+
+  .calc-submit {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  @media (max-width: 560px) {
+    .calc-input {
+      width: 118px;
+    }
+  }
+</style>
+
+<script>
+  const form = document.getElementById("calc-form") as HTMLFormElement | null;
+  const ratingInput = document.getElementById("calc-rating") as HTMLInputElement | null;
+  const ucInput = document.getElementById("calc-uc") as HTMLInputElement | null;
+  const ppoInput = document.getElementById("calc-ppo") as HTMLInputElement | null;
+  const totalEl = document.getElementById("calc-total");
+  const warningEl = document.getElementById("calc-warning");
+
+  function compute() {
+    const rating = Number(ratingInput?.value) || 0;
+    const uc = Number(ucInput?.value) || 0;
+    const ppo = Number(ppoInput?.value) || 0;
+    return { rating, total: rating * 100 + uc + ppo };
+  }
+
+  function applyState(total: number, rating: number) {
+    if (!totalEl) return;
+    const negative = rating < 0;
+    totalEl.textContent = total.toLocaleString("uk-UA");
+    totalEl.classList.toggle("is-negative", negative);
+    warningEl?.toggleAttribute("hidden", !negative);
+  }
+
+  let debounceId: ReturnType<typeof setTimeout> | undefined;
+  function scheduleLiveUpdate() {
+    clearTimeout(debounceId);
+    debounceId = setTimeout(() => {
+      const { rating, total } = compute();
+      applyState(total, rating);
+    }, 200);
+  }
+
+  [ratingInput, ucInput, ppoInput].forEach((el) => {
+    el?.addEventListener("input", scheduleLiveUpdate);
+  });
+
+  function animateTotal(target: number, rating: number) {
+    if (!totalEl) return;
+    clearTimeout(debounceId);
+    const negative = rating < 0;
+    totalEl.classList.toggle("is-negative", negative);
+    warningEl?.toggleAttribute("hidden", !negative);
+
+    const duration = 900;
+    const start = performance.now();
+    const sign = target < 0 ? -1 : 1;
+    const magnitude = Math.abs(target);
+
+    function tick(now: number) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const value = Math.round(magnitude * eased) * sign;
+      if (totalEl) totalEl.textContent = value.toLocaleString("uk-UA");
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const { rating, total } = compute();
+    animateTotal(total, rating);
+  });
+</script>

@@ -1,0 +1,105 @@
+---
+const GOALS = [
+  {
+    title: "Навчання через гру",
+    text: "Зрозуміти основні принципи роботи профспілки в інтерактивному та захоплюючому форматі настільної гри.",
+  },
+  {
+    title: "Стратегічне мислення",
+    text: "Розвинути навички прийняття рішень, планування ресурсів та вирішення кризових ситуацій у профспілковій діяльності.",
+  },
+  {
+    title: "Командна робота",
+    text: "Сприяти розумінню важливості співпраці, переговорів та колективних дій для досягнення спільних цілей.",
+  },
+  {
+    title: "Перемога",
+    text: "Набрати найбільшу кількість балів через ефективне управління ресурсами, вирішення проблем та розвиток профспілкової організації.",
+  },
+];
+---
+
+<section class="goal" id="goal">
+  <div class="container">
+    <h2 class="goal__title">Мета гри</h2>
+    <div class="goal__grid">
+      {GOALS.map((goal, i) => (
+        <div class="goal__item" data-reveal data-reveal-group="goal">
+          <p class="label goal__number">{String(i + 1).padStart(2, "0")}</p>
+          <h3 class="goal__item-title">{goal.title}</h3>
+          <span class="goal__rule" aria-hidden="true"></span>
+          <p class="goal__text">{goal.text}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .goal {
+    padding-block: var(--space-16);
+  }
+
+  @media (min-width: 861px) {
+    .goal {
+      padding-block: var(--space-32);
+    }
+  }
+
+  .goal__title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 6vw, 4rem);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+    margin-bottom: var(--space-8);
+  }
+
+  .goal__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--ink-600);
+  }
+
+  @media (min-width: 561px) {
+    .goal__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .goal__item {
+    background: var(--ink-700);
+    padding: 32px 28px;
+    transition: background 240ms ease, transform 240ms ease;
+  }
+
+  .goal__item:hover {
+    background: var(--ink-600);
+    transform: translateY(-3px);
+  }
+
+  .goal__number {
+    color: var(--brass);
+  }
+
+  .goal__item-title {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--bone);
+  }
+
+  .goal__rule {
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--brass);
+    margin-block: var(--space-3);
+  }
+
+  .goal__text {
+    color: var(--steel);
+  }
+</style>

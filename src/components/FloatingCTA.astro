@@ -1,0 +1,60 @@
+---
+import { JOIN_FORM_URL } from "../config/links.js";
+---
+
+<a class="floating-cta" href={JOIN_FORM_URL} target="_blank" rel="noopener">
+  Стань частиною ПРМТУ
+</a>
+
+<style>
+  .floating-cta {
+    position: fixed;
+    z-index: 30;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px 26px;
+    background: linear-gradient(
+      180deg,
+      #f3e6c4 0%,
+      var(--champ) 22%,
+      var(--brass) 55%,
+      #8a6b2e 78%,
+      var(--brass-dk) 100%
+    );
+    box-shadow:
+      var(--shadow-brass),
+      inset 0 1px 0 rgba(255, 255, 255, .65),
+      inset 0 -2px 4px rgba(0, 0, 0, .4);
+    color: var(--ink-900);
+    border-radius: var(--r-1);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    transition: transform 240ms ease-out, letter-spacing 240ms ease-out, box-shadow 240ms ease-out,
+      opacity 400ms ease;
+  }
+
+  .floating-cta:hover {
+    letter-spacing: 0.24em;
+    transform: translateY(-2px);
+    box-shadow:
+      var(--shadow-brass),
+      0 0 40px rgba(228, 210, 166, .3),
+      inset 0 1px 0 rgba(255, 255, 255, .65),
+      inset 0 -2px 4px rgba(0, 0, 0, .4);
+  }
+
+  .floating-cta:focus-visible {
+    outline: 2px solid var(--bone);
+    outline-offset: 3px;
+  }
+
+  @media (min-width: 861px) {
+    .floating-cta {
+      bottom: 32px;
+      right: 32px;
+    }
+  }
+</style>

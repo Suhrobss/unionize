@@ -1,0 +1,125 @@
+---
+// Паперова відомість (ДИЗАЙН-ТЗ §3.3): світлий блок-підпис усередині темного
+// оточення. Використовується калькулятором (§5.6) і, пізніше, екраном
+// підтвердження «Додаткової можливості» (§9.5).
+interface Props {
+  title: string;
+  totalLabel: string;
+  foldColor?: string;
+}
+const { title, totalLabel, foldColor = "var(--ink-700)" } = Astro.props;
+---
+
+<div class="ledger" style={`--ledger-fold: ${foldColor}`}>
+  <p class="label ledger__title">{title}</p>
+  <div class="ledger__rows">
+    <slot />
+  </div>
+  <div class="ledger__total">
+    <span class="ledger__total-label">{totalLabel}</span>
+    <span class="ledger__total-value"><slot name="total" /></span>
+  </div>
+  <slot name="warning" />
+</div>
+
+<style>
+  .ledger {
+    position: relative;
+    background:
+      repeating-linear-gradient(180deg, transparent 0 32px, rgba(23, 28, 34, .06) 32px 33px),
+      var(--paper);
+    color: var(--paper-ink);
+    border-radius: var(--r-1);
+    padding: 20px 16px;
+    box-shadow: var(--shadow-paper);
+  }
+
+  @media (min-width: 561px) {
+    .ledger {
+      padding: 24px 26px;
+    }
+  }
+
+  .ledger::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 40px 40px 0;
+    border-color: transparent var(--ledger-fold) transparent transparent;
+  }
+
+  .ledger__title {
+    color: var(--paper-dim);
+    padding-bottom: var(--space-2);
+    border-bottom: 2px solid var(--paper-ink);
+  }
+
+  .ledger__rows {
+    margin-top: var(--space-2);
+  }
+
+  .ledger__total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: var(--space-2);
+    padding-top: 14px;
+    border-top: 2px solid var(--paper-ink);
+  }
+
+  .ledger__total-label {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+  }
+
+  .ledger__total-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: clamp(1.6rem, 4.6vw, 2.3rem);
+    color: var(--paper-ink);
+  }
+
+  .ledger__total-value :global(.is-negative) {
+    color: var(--paper-neg);
+  }
+
+  :global(.ledger__row) {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: 10px 0;
+    border-bottom: 1px dashed rgba(23, 28, 34, .26);
+  }
+
+  @media (min-width: 561px) {
+    :global(.ledger__row) {
+      gap: var(--space-4);
+    }
+  }
+
+  :global(.ledger__row-label) {
+    color: var(--paper-ink);
+    font-size: 0.9375rem;
+  }
+
+  @media (min-width: 561px) {
+    :global(.ledger__row-label) {
+      font-size: 1rem;
+    }
+  }
+
+  :global(.ledger__row-note) {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--paper-dim);
+  }
+</style>

@@ -1,0 +1,229 @@
+---
+// Кількості порахо­вані за оцифрованою колодою з файлу правил. Самі тексти
+// карток у репозиторії не зберігаються (рішення замовника: вміст гри не йде
+// у відкритий доступ), тому тут лишились тільки числа.
+//
+// Розбіжність, яку варто пам'ятати: ІДЕЇ-ТЗ §0.2 називає 388 карток у 6
+// колодах, а в файлі правил колод сім — є ще «Ресурси» (48 карток, для
+// однойменної клітинки), і Центральна Рада налічує 42 картки, не 43.
+// Разом виходить 435. Числа нижче — з реального перерахунку.
+const COUNTS: Record<string, number> = {
+  "Позитивні": 100,
+  "Негативні": 100,
+  "Нейтральні": 80,
+  "Кризи": 50,
+  "Голови ПРМТУ": 15,
+  "Центральної Ради": 42,
+  "Ресурси": 48,
+};
+const countOf = (category: string) => COUNTS[category] ?? 0;
+
+const CATEGORIES = [
+  {
+    key: "positive",
+    title: "Позитивні",
+    count: countOf("Позитивні"),
+    color: "var(--pos)",
+    description:
+      "Надають гравцю позитивні бонуси: додаткові UnionCoin або соціальний рейтинг. Наприклад, +300 UnionCoin та +2 соціального рейтингу.",
+  },
+  {
+    key: "negative",
+    title: "Негативні",
+    count: countOf("Негативні"),
+    color: "var(--neg)",
+    description:
+      "Штрафні картки, що призводять до втрат ресурсів: зменшення UnionCoin або зниження соціального рейтингу.",
+  },
+  {
+    key: "neutral",
+    title: "Нейтральні",
+    count: countOf("Нейтральні"),
+    color: "var(--steel)",
+    description:
+      "Картки збалансованих подій, що надають гравцю вибір: прийняти один із двох варіантів із різними наслідками.",
+  },
+  {
+    key: "crisis",
+    title: "Кризи",
+    count: countOf("Кризи"),
+    color: "var(--suryk)",
+    description:
+      "Серйозні випробування для гравця: складні ситуації, що можуть значно вплинути на ресурси та рейтинг.",
+  },
+  {
+    key: "resource",
+    title: "Ресурси",
+    count: countOf("Ресурси"),
+    color: "var(--cell-resource)",
+    description: "Гарантований бонус для клітинки «Ресурси»: фіксоване надходження UnionCoin або соціального рейтингу.",
+  },
+  {
+    key: "chairman",
+    title: "Голови ПРМТУ",
+    count: countOf("Голови ПРМТУ"),
+    color: "var(--champ)",
+    description:
+      "Особливі картки від Голови ПРМТУ з потужними бонусами та рішеннями, що впливають на хід усієї партії.",
+  },
+  {
+    key: "council",
+    title: "Центральної Ради",
+    count: countOf("Центральної Ради"),
+    color: "var(--brass)",
+    description:
+      "Картки від Центральної Ради ПРМТУ — рішення, що змінюють UnionCoin і соціальний рейтинг гравця.",
+  },
+];
+---
+
+<section class="gallery" id="cards">
+  <div class="container">
+    <h2 class="gallery__title">Типи карток</h2>
+    <div class="gallery__grid">
+      {CATEGORIES.map((cat) => (
+        <button
+          class="flip-card"
+          type="button"
+          aria-pressed="false"
+          data-reveal
+          data-reveal-group="gallery"
+          style={`--cat-color: ${cat.color}`}
+        >
+          <span class="flip-card__inner">
+            <span class="flip-card__face flip-card__face--front">
+              <span class="flip-card__stripe"></span>
+              <span class="flip-card__title">{cat.title}</span>
+              <span class="label flip-card__count">{cat.count} карток</span>
+            </span>
+            <span class="flip-card__face flip-card__face--back">
+              <span class="flip-card__description">{cat.description}</span>
+            </span>
+          </span>
+        </button>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .gallery {
+    padding-block: var(--space-16);
+  }
+
+  @media (min-width: 861px) {
+    .gallery {
+      padding-block: var(--space-32);
+    }
+  }
+
+  .gallery__title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 6vw, 4rem);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+    margin-bottom: var(--space-8);
+  }
+
+  .gallery__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 561px) {
+    .gallery__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .flip-card {
+    aspect-ratio: 2 / 3;
+    perspective: 1200px;
+    text-align: left;
+  }
+
+  .flip-card__inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: block;
+    transform-style: preserve-3d;
+    transition: transform 520ms cubic-bezier(.16, 1, .28, 1);
+  }
+
+  .flip-card:focus-visible {
+    outline: 2px solid var(--champ);
+    outline-offset: 3px;
+  }
+
+  @media (hover: hover) {
+    .flip-card:hover .flip-card__inner {
+      transform: rotateY(180deg);
+    }
+  }
+
+  .flip-card.is-flipped .flip-card__inner {
+    transform: rotateY(180deg);
+  }
+
+  .flip-card__face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: var(--r-2);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .flip-card__face--front {
+    background: var(--ink-700);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--space-2);
+  }
+
+  .flip-card__stripe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--cat-color);
+    border-radius: var(--r-2) var(--r-2) 0 0;
+  }
+
+  .flip-card__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--bone);
+  }
+
+  .flip-card__count {
+    color: var(--dim);
+  }
+
+  .flip-card__face--back {
+    background: color-mix(in srgb, var(--cat-color) 32%, var(--ink-900));
+    transform: rotateY(180deg);
+    justify-content: center;
+  }
+
+  .flip-card__description {
+    color: var(--bone);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>(".flip-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      const flipped = card.classList.toggle("is-flipped");
+      card.setAttribute("aria-pressed", String(flipped));
+    });
+  });
+</script>

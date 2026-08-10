@@ -1,0 +1,486 @@
+---
+import GravureScale from "../instrument/GravureScale.astro";
+import PaperLedger from "../instrument/PaperLedger.astro";
+---
+
+<section class="ap" id="ap-app">
+  <div class="container">
+    <!-- Екран 0: памʼятка -->
+    <div class="ap-screen" id="ap-screen-0">
+      <p class="label ap__eyebrow">Додаткова можливість</p>
+      <h1 class="ap__title">Виконай завдання —<br />отримай 200 UC</h1>
+
+      <PaperLedger title="Умови з правил гри" totalLabel="">
+        <div class="ledger__row"><span class="ledger__row-label">Активи менше 1000 UC</span></div>
+        <div class="ledger__row"><span class="ledger__row-label">Не більше 2 разів поспіль за коло</span></div>
+        <div class="ledger__row"><span class="ledger__row-label">Не більше 5 разів за всю гру</span></div>
+        <span slot="total"></span>
+      </PaperLedger>
+
+      <p class="label ap__disclaimer">Сайт умови не перевіряє — це робить ведучий.</p>
+      <button type="button" class="btn-brass" id="ap-start">Почати</button>
+    </div>
+
+    <!-- Екран 1: вибір гілки -->
+    <div class="ap-screen" id="ap-screen-1" hidden>
+      <div class="ap-branches">
+        <button type="button" class="ap-branch-card" id="ap-choose-task">
+          <p class="ap-branch-card__title">Виконати завдання</p>
+          <span class="ap-branch-card__rule"></span>
+          <p class="ap-branch-card__text">Одна дія в соцмережах</p>
+          <span class="btn-outline">Обрати</span>
+        </button>
+        <button type="button" class="ap-branch-card" id="ap-choose-quiz">
+          <p class="ap-branch-card__title">Взяти участь у вікторині</p>
+          <span class="ap-branch-card__rule"></span>
+          <p class="ap-branch-card__text">5 питань, треба 3 правильні</p>
+          <span class="btn-outline">Обрати</span>
+          <p class="label ap-branch-card__unavailable" id="ap-quiz-unavailable" hidden>
+            Вікторина тимчасово недоступна. Скористайтесь завданням
+          </p>
+        </button>
+      </div>
+    </div>
+
+    <!-- Гілка А: завдання -->
+    <div class="ap-screen" id="ap-screen-task" hidden>
+      <p class="label">Завдання</p>
+      <h2 class="ap-task__title" id="ap-task-title"></h2>
+      <div class="ap-task__steps" id="ap-task-steps">
+        <div class="ap-step" id="ap-step-0" hidden>
+          <input type="checkbox" id="ap-step-check-0" class="ap-step__check" />
+          <label for="ap-step-check-0" class="ap-step__action" id="ap-step-action-0"></label>
+          <a class="btn-outline ap-step__btn" id="ap-step-link-0" target="_blank" rel="noopener">Відкрити</a>
+        </div>
+        <div class="ap-step" id="ap-step-1" hidden>
+          <input type="checkbox" id="ap-step-check-1" class="ap-step__check" />
+          <label for="ap-step-check-1" class="ap-step__action" id="ap-step-action-1"></label>
+          <a class="btn-outline ap-step__btn" id="ap-step-link-1" target="_blank" rel="noopener">Відкрити</a>
+        </div>
+        <div class="ap-step" id="ap-step-2" hidden>
+          <input type="checkbox" id="ap-step-check-2" class="ap-step__check" />
+          <label for="ap-step-check-2" class="ap-step__action" id="ap-step-action-2"></label>
+          <a class="btn-outline ap-step__btn" id="ap-step-link-2" target="_blank" rel="noopener">Відкрити</a>
+        </div>
+      </div>
+      <p class="label ap__disclaimer">Галочки — для себе. Сайт їх не перевіряє.</p>
+      <div class="ap-task__actions">
+        <button type="button" class="btn-brass" id="ap-task-done">Я виконав</button>
+        <button type="button" class="btn-outline" id="ap-task-shuffle">Показати інше завдання</button>
+      </div>
+    </div>
+
+    <!-- Гілка Б: вікторина -->
+    <div class="ap-screen" id="ap-screen-quiz" hidden>
+      <div class="ap-quiz__top">
+        <span class="label">Вікторина</span>
+        <span class="label" id="ap-quiz-progress"></span>
+      </div>
+      <GravureScale id="ap-quiz-scale" />
+      <h2 class="ap-quiz__question" id="ap-quiz-question"></h2>
+      <div class="ap-quiz__options">
+        <button type="button" class="ap-quiz-option" id="ap-quiz-opt-0" data-index="0"><span class="ap-quiz-option__letter"></span><span class="ap-quiz-option__text"></span></button>
+        <button type="button" class="ap-quiz-option" id="ap-quiz-opt-1" data-index="1"><span class="ap-quiz-option__letter"></span><span class="ap-quiz-option__text"></span></button>
+        <button type="button" class="ap-quiz-option" id="ap-quiz-opt-2" data-index="2"><span class="ap-quiz-option__letter"></span><span class="ap-quiz-option__text"></span></button>
+        <button type="button" class="ap-quiz-option" id="ap-quiz-opt-3" data-index="3"><span class="ap-quiz-option__letter"></span><span class="ap-quiz-option__text"></span></button>
+      </div>
+      <div class="ap-quiz__explanation" id="ap-quiz-explanation" hidden>
+        <p class="ap-quiz__explanation-title" id="ap-quiz-explanation-title"></p>
+        <p class="ap-quiz__explanation-text" id="ap-quiz-explanation-text"></p>
+      </div>
+      <button type="button" class="btn-brass ap-quiz__next" id="ap-quiz-next" hidden>Далі</button>
+    </div>
+
+    <!-- Гілка Б: провал -->
+    <div class="ap-screen" id="ap-screen-quiz-fail" hidden>
+      <h2 class="ap-fail__title" id="ap-fail-title"></h2>
+      <p class="ap-fail__text">Потрібно 3 правильні відповіді. Наступна спроба — інші питання.</p>
+      <div class="ap-task__actions">
+        <button type="button" class="btn-brass" id="ap-fail-retry">Спробувати ще</button>
+        <button type="button" class="btn-outline" id="ap-fail-back">До вибору</button>
+      </div>
+    </div>
+
+    <!-- Екран підтвердження -->
+    <div class="ap-screen" id="ap-screen-confirm" hidden>
+      <PaperLedger title="Підтвердження виконання" totalLabel="">
+        <div class="ap-confirm__amount">200 UC</div>
+        <div class="ledger__row">
+          <span class="ledger__row-label">Код видачі</span>
+        </div>
+        <div class="ap-confirm__stamp-wrap"><span class="ap-confirm__stamp" id="ap-confirm-code"></span></div>
+        <div class="ledger__row">
+          <span class="ledger__row-label">Час</span>
+          <span class="ledger__row-value" id="ap-confirm-time"></span>
+        </div>
+        <p class="label ap-confirm__verify-label">Ведучому перевірити</p>
+        <div class="ap-confirm__verify" id="ap-confirm-verify"></div>
+        <p class="ap-confirm__note">Один код — одна виплата</p>
+        <span slot="total"></span>
+      </PaperLedger>
+      <button type="button" class="btn-outline ap-confirm__done" id="ap-confirm-done">Готово</button>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .ap-screen[hidden] {
+    display: none;
+  }
+
+  .ap {
+    padding-block: var(--space-16);
+    min-height: 70svh;
+  }
+
+  @media (min-width: 861px) {
+    .ap {
+      padding-block: var(--space-32);
+    }
+  }
+
+  .ap__eyebrow {
+    color: var(--dim);
+  }
+
+  .ap__title {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 6vw, 3.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    max-width: 16ch;
+  }
+
+  .ap-screen#ap-screen-0 :global(.ledger) {
+    max-width: 420px;
+    margin-top: var(--space-8);
+  }
+
+  .ap-screen#ap-screen-0 :global(.ledger__total) {
+    display: none;
+  }
+
+  .ap__disclaimer {
+    color: var(--dim);
+    margin-top: var(--space-4);
+  }
+
+  #ap-start,
+  #ap-task-done,
+  .ap-task__actions,
+  .ap-quiz__next {
+    margin-top: var(--space-6);
+  }
+
+  /* --- branch choice --- */
+  .ap-branches {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 560px) {
+    .ap-branches {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .ap-branch-card {
+    background: var(--ink-700);
+    border: var(--hairline);
+    border-radius: var(--r-2);
+    padding: 32px 28px;
+    text-align: left;
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+
+  .ap-branch-card:hover {
+    background: var(--ink-600);
+    border-color: rgba(228, 210, 166, .3);
+  }
+
+  .ap-branch-card.is-disabled {
+    opacity: .5;
+    pointer-events: none;
+  }
+
+  .ap-branch-card__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--bone);
+  }
+
+  .ap-branch-card__rule {
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--brass);
+    margin-block: var(--space-3);
+  }
+
+  .ap-branch-card__text {
+    color: var(--steel);
+    margin-bottom: var(--space-6);
+  }
+
+  .ap-branch-card__unavailable {
+    margin-top: var(--space-3);
+    color: var(--dim);
+  }
+
+  /* --- task branch --- */
+  .ap-task__title {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--bone);
+  }
+
+  .ap-task__steps {
+    margin-top: var(--space-6);
+    background: var(--ink-700);
+    border: var(--hairline);
+    border-radius: var(--r-2);
+    padding: 8px 28px;
+  }
+
+  .ap-step {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 56px;
+    padding: 12px 0;
+    border-bottom: var(--hairline);
+  }
+
+  .ap-step[hidden] {
+    display: none;
+  }
+
+  .ap-step:last-child {
+    border-bottom: none;
+  }
+
+  .ap-step__check {
+    width: 22px;
+    height: 22px;
+    accent-color: var(--champ);
+    flex-shrink: 0;
+  }
+
+  .ap-step__action {
+    flex: 1 1 auto;
+    color: var(--bone);
+  }
+
+  .ap-step__btn {
+    flex-shrink: 0;
+    padding: 8px 14px;
+  }
+
+  .ap-task__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  /* --- quiz branch --- */
+  .ap-quiz__top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+  }
+
+  .ap-quiz__question {
+    margin-top: var(--space-6);
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.25rem, 3.6vw, 1.8rem);
+    color: var(--bone);
+    max-width: 28ch;
+  }
+
+  .ap-quiz__options {
+    margin-top: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .ap-quiz-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    background: var(--ink-700);
+    border: var(--hairline);
+    border-radius: var(--r-2);
+    padding: 16px 18px;
+    min-height: 56px;
+    text-align: left;
+    color: var(--bone);
+    transition: background 140ms ease, border-color 140ms ease;
+  }
+
+  .ap-quiz-option:hover:not(:disabled) {
+    background: var(--ink-600);
+  }
+
+  .ap-quiz-option__letter {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r-1);
+    border: var(--hairline);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--dim);
+  }
+
+  .ap-quiz-option.is-correct {
+    border: 2px solid var(--pos);
+    background: rgba(63, 191, 127, .1);
+  }
+
+  .ap-quiz-option.is-correct .ap-quiz-option__letter {
+    color: var(--pos);
+  }
+
+  .ap-quiz-option.is-incorrect {
+    border: 2px solid var(--neg);
+    background: rgba(255, 90, 69, .1);
+  }
+
+  .ap-quiz-option.is-incorrect .ap-quiz-option__letter {
+    color: var(--neg);
+  }
+
+  .ap-quiz-option.is-dimmed {
+    opacity: .4;
+  }
+
+  .ap-quiz__explanation {
+    margin-top: var(--space-6);
+    padding-left: 16px;
+    border-left: 3px solid var(--dim);
+  }
+
+  .ap-quiz__explanation.is-correct {
+    border-left-color: var(--pos);
+  }
+
+  .ap-quiz__explanation.is-incorrect {
+    border-left-color: var(--neg);
+  }
+
+  .ap-quiz__explanation-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--bone);
+  }
+
+  .ap-quiz__explanation-text {
+    margin-top: var(--space-2);
+    color: var(--bone);
+    max-width: 56ch;
+  }
+
+  /* --- fail --- */
+  .ap-fail__title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    color: var(--bone);
+  }
+
+  .ap-fail__title .outline-fail {
+    color: transparent;
+    -webkit-text-stroke: 1.4px var(--bone);
+  }
+
+  .ap-fail__text {
+    margin-top: var(--space-3);
+    color: var(--steel);
+  }
+
+  /* --- confirmation --- */
+  #ap-screen-confirm :global(.ledger) {
+    max-width: 480px;
+    margin-inline: auto;
+  }
+
+  #ap-screen-confirm :global(.ledger__total) {
+    display: none;
+  }
+
+  .ap-confirm__amount {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: clamp(2rem, 8vw, 3rem);
+    color: var(--paper-ink);
+    margin-block: var(--space-4);
+  }
+
+  .ap-confirm__stamp-wrap {
+    display: flex;
+    justify-content: center;
+    padding-block: var(--space-4);
+  }
+
+  .ap-confirm__stamp {
+    display: inline-block;
+    border: 2px solid var(--paper-ink);
+    border-radius: var(--r-1);
+    padding: 12px 24px;
+    background: var(--paper-2);
+    transform: rotate(-1.5deg);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+    letter-spacing: 0.12em;
+    color: var(--paper-ink);
+  }
+
+  .ledger__row-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--paper-ink);
+  }
+
+  .ap-confirm__verify-label {
+    margin-top: var(--space-4);
+    color: var(--paper-dim);
+  }
+
+  .ap-confirm__verify {
+    margin-top: var(--space-2);
+    color: var(--paper-ink);
+  }
+
+  .ap-confirm__note {
+    margin-top: var(--space-4);
+    text-align: center;
+    color: var(--paper-dim);
+    font-size: 0.875rem;
+  }
+
+  .ap-confirm__done {
+    display: block;
+    margin: var(--space-6) auto 0;
+  }
+
+  @media print {
+    .ap > .container > *:not(#ap-screen-confirm),
+    header, footer, #lighthouse, .floating-cta, .scroll-top {
+      display: none !important;
+    }
+  }
+</style>

@@ -1,0 +1,289 @@
+---
+import faqData from "../../data/faq.json";
+import { highlightNumbers } from "../utils/highlightNumbers";
+
+interface FaqBlock {
+  type: "p" | "list" | "subhead";
+  text?: string;
+  items?: string[];
+}
+interface FaqQuestion {
+  id: string;
+  category: string;
+  question: string;
+  answer: FaqBlock[];
+}
+interface FaqCategory {
+  key: string;
+  label: string;
+  title: string;
+}
+
+const categories = faqData.categories as FaqCategory[];
+const questions = faqData.questions as FaqQuestion[];
+---
+
+<section class="faq" id="faq">
+  <div class="container">
+    <h2 class="faq__title">Правила / FAQ</h2>
+
+    <div class="faq__chips" role="group" aria-label="Фільтр питань за розділом">
+      <button class="chip is-active" type="button" data-filter="all">Усі</button>
+      {categories.map((c) => (
+        <button class="chip" type="button" data-filter={c.key}>{c.label}</button>
+      ))}
+    </div>
+
+    <div class="faq__list" id="faq-list" data-reveal>
+      {questions.map((q) => (
+        <div class="faq-row" data-category={q.category}>
+          <button class="faq-row__trigger" aria-expanded="false">
+            <span class="faq-row__question">{q.question}</span>
+            <span class="faq-row__arrow" aria-hidden="true"></span>
+          </button>
+          <div class="faq-row__panel">
+            <div class="faq-row__answer">
+              {q.answer.map((block) => {
+                if (block.type === "list") {
+                  return (
+                    <ul class="faq-row__list">
+                      {block.items?.map((item) => (
+                        <li set:html={highlightNumbers(item)} />
+                      ))}
+                    </ul>
+                  );
+                }
+                if (block.type === "subhead") {
+                  return <p class="faq-row__subhead" set:html={highlightNumbers(block.text ?? "")} />;
+                }
+                return <p class="faq-row__p" set:html={highlightNumbers(block.text ?? "")} />;
+              })}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="faq__empty" id="faq-empty" hidden>
+      <p>У цьому розділі поки немає питань. Подивіться всі правила.</p>
+      <button class="btn-outline" type="button" id="faq-show-all">Показати всі</button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq {
+    padding-block: var(--space-16);
+  }
+
+  @media (min-width: 861px) {
+    .faq {
+      padding-block: var(--space-32);
+    }
+  }
+
+  .faq__title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 6vw, 4rem);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+    margin-bottom: var(--space-6);
+  }
+
+  .faq__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+  }
+
+  .chip {
+    padding: 8px 14px;
+    border-radius: var(--r-1);
+    border: var(--hairline);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+  }
+
+  .chip.is-active {
+    background: var(--champ);
+    border-color: var(--champ);
+    color: var(--ink-900);
+  }
+
+  .faq-row {
+    border-bottom: var(--hairline);
+  }
+
+  .faq-row__trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: 20px 0;
+    position: relative;
+    text-align: left;
+  }
+
+  .faq-row__trigger::before {
+    content: "";
+    position: absolute;
+    left: -16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 2px;
+    background: var(--brass);
+    transition: width 200ms ease;
+  }
+
+  .faq-row__trigger:hover::before {
+    width: 16px;
+  }
+
+  .faq-row__question {
+    font-weight: 500;
+    font-size: 1.0625rem;
+    color: var(--bone);
+    transition: color 200ms ease;
+  }
+
+  .faq-row__trigger:hover .faq-row__question {
+    color: var(--champ);
+  }
+
+  .faq-row__arrow {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    background: var(--dim);
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    transition: transform 240ms ease, background 200ms ease;
+  }
+
+  .faq-row__trigger:hover .faq-row__arrow {
+    background: var(--champ);
+  }
+
+  .faq-row.is-open .faq-row__arrow {
+    transform: rotate(90deg);
+  }
+
+  .faq-row__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 320ms cubic-bezier(.16, 1, .28, 1);
+  }
+
+  .faq-row.is-open .faq-row__panel {
+    grid-template-rows: 1fr;
+  }
+
+  .faq-row__answer {
+    overflow: hidden;
+  }
+
+  .faq-row__p,
+  .faq-row__subhead {
+    max-width: 68ch;
+    color: var(--steel);
+    padding-bottom: var(--space-2);
+  }
+
+  .faq-row__p:last-child,
+  .faq-row__subhead:last-child {
+    padding-bottom: 20px;
+  }
+
+  .faq-row__subhead {
+    font-weight: 600;
+    color: var(--bone);
+  }
+
+  .faq-row__list {
+    max-width: 68ch;
+    margin: 0 0 20px;
+    padding-left: 1.1em;
+    color: var(--steel);
+  }
+
+  .faq-row__list li {
+    padding-bottom: var(--space-2);
+  }
+
+  .faq-row__p :global(.num),
+  .faq-row__subhead :global(.num),
+  .faq-row__list :global(.num) {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: inherit;
+  }
+
+  .faq-row__p :global(.num--uc),
+  .faq-row__subhead :global(.num--uc),
+  .faq-row__list :global(.num--uc) {
+    color: var(--champ);
+  }
+
+  .faq-row__p :global(.num--rating),
+  .faq-row__subhead :global(.num--rating),
+  .faq-row__list :global(.num--rating) {
+    color: var(--lyman);
+  }
+
+  .faq__empty {
+    padding-block: var(--space-8);
+    color: var(--steel);
+  }
+
+  .btn-outline {
+    margin-top: var(--space-3);
+    padding: 10px 20px;
+    border-radius: var(--r-1);
+    border: 1px solid rgba(228, 210, 166, .4);
+    color: var(--champ);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+</style>
+
+<script>
+  const chips = document.querySelectorAll<HTMLButtonElement>(".chip");
+  const rows = document.querySelectorAll<HTMLDivElement>(".faq-row");
+  const emptyState = document.getElementById("faq-empty");
+  const showAllBtn = document.getElementById("faq-show-all");
+
+  function applyFilter(key: string) {
+    let visibleCount = 0;
+    rows.forEach((row) => {
+      const matches = key === "all" || row.dataset.category === key;
+      row.hidden = !matches;
+      if (matches) visibleCount += 1;
+    });
+    emptyState?.toggleAttribute("hidden", visibleCount !== 0);
+    chips.forEach((chip) => chip.classList.toggle("is-active", chip.dataset.filter === key));
+  }
+
+  chips.forEach((chip) => {
+    chip.addEventListener("click", () => applyFilter(chip.dataset.filter ?? "all"));
+  });
+
+  showAllBtn?.addEventListener("click", () => applyFilter("all"));
+
+  document.querySelectorAll<HTMLButtonElement>(".faq-row__trigger").forEach((trigger) => {
+    trigger.addEventListener("click", () => {
+      const row = trigger.closest(".faq-row");
+      const isOpen = row?.classList.toggle("is-open");
+      trigger.setAttribute("aria-expanded", String(Boolean(isOpen)));
+    });
+  });
+</script>

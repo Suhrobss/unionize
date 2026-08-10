@@ -1,0 +1,427 @@
+---
+import GravureScale from "../instrument/GravureScale.astro";
+---
+
+<section class="archetype" id="archetype-app">
+  <div class="container">
+    <!-- Екран 1: запрошення -->
+    <div class="a-screen a-intro" id="screen-intro">
+      <p class="label a-intro__eyebrow">Профіль профспілкової поведінки</p>
+      <h1 class="a-intro__title">
+        Як ти поводишся,<br />коли треба вирішувати
+      </h1>
+      <p class="a-intro__lede">12 ситуацій з гри. Дві хвилини. У кінці — твій профіль і картка.</p>
+      <button type="button" class="btn-brass" id="start-test">Почати</button>
+    </div>
+
+    <!-- Екран 2: питання -->
+    <div class="a-screen a-question" id="screen-question" hidden>
+      <div class="a-question__top">
+        <button type="button" class="a-question__back" id="q-back">← Назад</button>
+        <span class="label" id="q-progress-label">1 / 12</span>
+      </div>
+      <GravureScale id="quiz-progress" />
+      <h2 class="a-question__situation" id="q-situation"></h2>
+      <div class="a-question__options">
+        <button type="button" class="a-option" id="opt-0" data-index="0"></button>
+        <button type="button" class="a-option" id="opt-1" data-index="1"></button>
+      </div>
+      <button type="button" class="btn-brass a-question__next" id="q-next" disabled>Далі</button>
+    </div>
+
+    <!-- Екран 3: результат -->
+    <div class="a-screen a-result" id="screen-result" hidden>
+      <div class="a-result__block a-result__hero">
+        <p class="label" id="r-name-label">ТВІЙ ПРОФІЛЬ</p>
+        <h1 class="a-result__name" id="r-name"></h1>
+        <p class="a-result__motto" id="r-motto"></p>
+        <p class="label a-result__rarity" id="r-rarity" hidden></p>
+      </div>
+
+      <div class="a-result__block" data-reveal data-reveal-group="result">
+        <p class="a-result__p" id="r-about-1"></p>
+        <p class="a-result__p" id="r-about-2"></p>
+        <p class="a-result__p" id="r-about-3"></p>
+      </div>
+
+      <div class="a-result__block a-result__scales" data-reveal data-reveal-group="result">
+        <div class="a-scale-row">
+          <div class="a-scale-row__head">
+            <span id="r-scale-a-label"></span>
+            <span class="label" id="r-scale-a-value"></span>
+          </div>
+          <GravureScale id="r-scale-a" />
+          <p class="label a-scale-row__poles" id="r-scale-a-poles"></p>
+        </div>
+        <div class="a-scale-row">
+          <div class="a-scale-row__head">
+            <span id="r-scale-b-label"></span>
+            <span class="label" id="r-scale-b-value"></span>
+          </div>
+          <GravureScale id="r-scale-b" />
+          <p class="label a-scale-row__poles" id="r-scale-b-poles"></p>
+        </div>
+        <div class="a-scale-row">
+          <div class="a-scale-row__head">
+            <span id="r-scale-c-label"></span>
+            <span class="label" id="r-scale-c-value"></span>
+          </div>
+          <GravureScale id="r-scale-c" />
+          <p class="label a-scale-row__poles" id="r-scale-c-poles"></p>
+        </div>
+      </div>
+
+      <div class="a-result__block" data-reveal data-reveal-group="result">
+        <p class="label a-result__heading">Твоя сила</p>
+        <ul class="a-result__list" id="r-strengths"></ul>
+      </div>
+
+      <div class="a-result__block a-result__blindspot" data-reveal data-reveal-group="result">
+        <p class="label a-result__heading">Твоя сліпа зона</p>
+        <ul class="a-result__list" id="r-blindspot"></ul>
+      </div>
+
+      <div class="a-result__block" data-reveal data-reveal-group="result">
+        <p class="label a-result__heading">Як ти граєш в Unionize</p>
+        <p class="a-result__p" id="r-howyouplay"></p>
+      </div>
+
+      <div class="a-result__block a-result__pair" data-reveal data-reveal-group="result">
+        <div class="a-pair-card a-pair-card--ally">
+          <p class="label">Союзник</p>
+          <p class="a-pair-card__name" id="r-ally-name"></p>
+          <a class="a-pair-card__link" id="r-ally-link"></a>
+        </div>
+        <div class="a-pair-card a-pair-card--opponent">
+          <p class="label">Опонент</p>
+          <p class="a-pair-card__name" id="r-opponent-name"></p>
+          <a class="a-pair-card__link" id="r-opponent-link"></a>
+        </div>
+      </div>
+
+      <div class="a-result__block a-result__life" data-reveal data-reveal-group="result">
+        <p class="label a-result__life-label">Що це означає в житті</p>
+        <p class="a-result__life-text" id="r-life"></p>
+        <a href="#" class="btn-brass a-result__join" id="r-join">Стати частиною ПРМТУ</a>
+      </div>
+
+      <div class="a-result__block a-result__actions">
+        <button type="button" class="btn-brass" id="r-share">Поділитись у сторіз</button>
+        <button type="button" class="btn-outline" id="r-retry">Пройти ще раз</button>
+        <a href="/rules" class="a-result__learn">Дізнатись про гру</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<canvas id="share-canvas" width="1080" height="1920" hidden></canvas>
+
+<style>
+  .archetype {
+    padding-block: var(--space-16);
+    min-height: 70svh;
+  }
+
+  @media (min-width: 861px) {
+    .archetype {
+      padding-block: var(--space-32);
+    }
+  }
+
+  .a-screen[hidden] {
+    display: none;
+  }
+
+  /* --- інтро --- */
+  .a-intro {
+    max-width: 60ch;
+  }
+
+  .a-intro__eyebrow {
+    color: var(--dim);
+    margin-bottom: var(--space-4);
+  }
+
+  .a-intro__title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 6vw, 4rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .a-intro__lede {
+    margin-top: var(--space-4);
+    color: var(--steel);
+    max-width: 44ch;
+  }
+
+  .a-intro #start-test {
+    margin-top: var(--space-8);
+  }
+
+  /* --- питання --- */
+  .a-question {
+    max-width: 640px;
+  }
+
+  .a-question__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+  }
+
+  .a-question__back {
+    color: var(--dim);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .a-question__back:hover {
+    color: var(--champ);
+  }
+
+  .a-question__back[hidden] {
+    visibility: hidden;
+  }
+
+  .a-question__situation {
+    margin-top: var(--space-8);
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.35rem, 4vw, 2rem);
+    color: var(--bone);
+    max-width: 24ch;
+  }
+
+  .a-question__options {
+    margin-top: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .a-option {
+    background: var(--ink-700);
+    border: var(--hairline);
+    border-radius: var(--r-2);
+    padding: 20px 22px;
+    min-height: 72px;
+    text-align: left;
+    color: var(--bone);
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+
+  .a-option:hover {
+    background: var(--ink-600);
+    border-color: rgba(228, 210, 166, .3);
+  }
+
+  .a-option.is-selected {
+    border: 2px solid var(--champ);
+    background: var(--ink-600);
+    position: relative;
+    padding-left: 26px;
+  }
+
+  .a-option.is-selected::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--brass);
+  }
+
+  .a-question__next {
+    margin-top: var(--space-8);
+  }
+
+  .a-question__next:disabled {
+    background: transparent;
+    box-shadow: none;
+    border: 1px solid rgba(244, 244, 240, .14);
+    color: var(--dim);
+    cursor: not-allowed;
+  }
+
+  /* --- результат --- */
+  .a-result {
+    max-width: 720px;
+  }
+
+  .a-result__block {
+    padding-block: 48px;
+    border-bottom: var(--hairline);
+  }
+
+  .a-result__hero {
+    padding-top: 0;
+  }
+
+  .a-result__name {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(2.4rem, 9vw, 5rem);
+    color: var(--bone);
+  }
+
+  .a-result__motto {
+    margin-top: var(--space-2);
+    color: var(--steel);
+    font-style: italic;
+  }
+
+  .a-result__rarity {
+    margin-top: var(--space-3);
+    color: var(--champ);
+  }
+
+  .a-result__p {
+    max-width: 60ch;
+    color: var(--bone);
+    margin-top: var(--space-4);
+  }
+
+  .a-result__p:first-child {
+    margin-top: 0;
+  }
+
+  .a-scale-row + .a-scale-row {
+    margin-top: var(--space-6);
+  }
+
+  .a-scale-row__head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+    color: var(--bone);
+    font-weight: 500;
+  }
+
+  .a-scale-row__poles {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--space-2);
+    color: var(--dim);
+  }
+
+  .a-result__heading {
+    color: var(--dim);
+    margin-bottom: var(--space-3);
+  }
+
+  .a-result__list {
+    margin: 0;
+    padding-left: 1.1em;
+    color: var(--bone);
+  }
+
+  .a-result__list li {
+    margin-top: var(--space-2);
+  }
+
+  .a-result__blindspot {
+    border: 1px solid rgba(196, 51, 31, .35);
+    border-radius: var(--r-2);
+    padding: 24px;
+  }
+
+  .a-result__blindspot .a-result__list li::marker {
+    color: var(--suryk);
+  }
+
+  .a-result__pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+
+  .a-pair-card {
+    padding-left: var(--space-3);
+    border-left: 2px solid var(--pos);
+  }
+
+  .a-pair-card--opponent {
+    border-left-color: var(--neg);
+  }
+
+  .a-pair-card__name {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--bone);
+  }
+
+  .a-pair-card__link {
+    display: inline-block;
+    margin-top: var(--space-2);
+    color: var(--champ);
+    font-size: 0.875rem;
+  }
+
+  .a-result__life {
+    background: var(--paper);
+    color: var(--paper-ink);
+    border-radius: var(--r-1);
+    padding: 28px 24px;
+    border-bottom: none;
+    box-shadow: var(--shadow-paper);
+  }
+
+  .a-result__life-label {
+    color: var(--paper-dim);
+  }
+
+  .a-result__life-text {
+    margin-top: var(--space-3);
+    max-width: 56ch;
+  }
+
+  .a-result__join {
+    display: inline-flex;
+    margin-top: var(--space-6);
+    text-decoration: none;
+  }
+
+  .a-result__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    border-bottom: none;
+  }
+
+  .a-result__learn {
+    color: var(--champ);
+    font-weight: 500;
+  }
+
+  .a-result__learn:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 560px) {
+    .a-result__pair {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+  }
+
+  .btn-outline {
+    padding: 10px 20px;
+    border-radius: var(--r-1);
+    border: 1px solid rgba(228, 210, 166, .4);
+    color: var(--champ);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: transparent;
+  }
+</style>

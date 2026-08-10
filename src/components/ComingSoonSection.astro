@@ -1,0 +1,57 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  text: string;
+}
+const { eyebrow, title, text } = Astro.props;
+---
+
+<section class="coming-soon">
+  <div class="container">
+    <p class="label coming-soon__eyebrow">{eyebrow}</p>
+    <h1 class="coming-soon__title">{title}</h1>
+    <p class="coming-soon__text">{text}</p>
+    <a href="/rules" class="coming-soon__link">Тим часом — правила гри →</a>
+  </div>
+</section>
+
+<style>
+  .coming-soon {
+    min-height: 60svh;
+    display: flex;
+    align-items: center;
+    padding-block: var(--space-16);
+  }
+
+  .coming-soon__eyebrow {
+    color: var(--dim);
+    margin-bottom: var(--space-4);
+  }
+
+  .coming-soon__title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 6vw, 4rem);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+    max-width: 16ch;
+  }
+
+  .coming-soon__text {
+    margin-top: var(--space-4);
+    max-width: 56ch;
+    color: var(--steel);
+  }
+
+  .coming-soon__link {
+    display: inline-block;
+    margin-top: var(--space-6);
+    color: var(--champ);
+    font-weight: 500;
+  }
+
+  .coming-soon__link:hover {
+    text-decoration: underline;
+  }
+</style>

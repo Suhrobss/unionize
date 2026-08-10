@@ -1,0 +1,116 @@
+---
+// Модальна панель — спільний компонент (ДИЗАЙН-ТЗ §4.5). Порожня оболонка;
+// вміст вставляє клієнтський скрипт через src/scripts/modal.ts.
+interface Props {
+  id: string;
+  labelledBy?: string;
+}
+const { id } = Astro.props;
+---
+
+<div class="modal-backdrop" id={`${id}-backdrop`} hidden></div>
+<div class="modal" id={id} role="dialog" aria-modal="true" hidden>
+  <button class="modal__close" type="button" id={`${id}-close`} aria-label="Закрити">
+    <span aria-hidden="true">✕</span>
+  </button>
+  <span class="modal__handle" aria-hidden="true"></span>
+  <div class="modal__body" id={`${id}-body`}></div>
+</div>
+
+<style>
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(4, 9, 14, .72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: opacity 240ms ease;
+  }
+
+  .modal-backdrop.is-visible {
+    opacity: 1;
+  }
+
+  .modal {
+    position: fixed;
+    z-index: 61;
+    background: var(--ink-700);
+    overflow-y: auto;
+    transition: transform 320ms cubic-bezier(.16, 1, .28, 1);
+  }
+
+  /* мобільний: знизу */
+  .modal {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 88svh;
+    border-radius: var(--r-2) var(--r-2) 0 0;
+    padding: 20px;
+    transform: translateY(100%);
+  }
+
+  .modal.is-open {
+    transform: translateY(0);
+  }
+
+  .modal__handle {
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: var(--dim);
+    border-radius: var(--r-full);
+    margin: 0 auto 16px;
+  }
+
+  @media (min-width: 861px) {
+    .modal {
+      left: auto;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 440px;
+      max-height: none;
+      border-radius: 0;
+      border-left: var(--hairline-accent);
+      padding: 32px;
+      transform: translateX(100%);
+    }
+
+    .modal.is-open {
+      transform: translateX(0);
+    }
+
+    .modal__handle {
+      display: none;
+    }
+  }
+
+  .modal__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dim);
+  }
+
+  .modal__close:hover {
+    color: var(--champ);
+  }
+
+  .modal__body {
+    margin-top: var(--space-6);
+  }
+
+  @media (min-width: 861px) {
+    .modal__body {
+      margin-top: var(--space-4);
+    }
+  }
+</style>

@@ -1,0 +1,139 @@
+---
+// Тексти — з docs/Unionize правила.txt, розділ "Вітальні слова" (актуальна
+// редакція з назвою Unionize). Емодзі — з reference/index.html, де вони
+// збережені коректно (у вихідному .txt кодування зіпсувало ці символи).
+// ІДЕЇ-ТЗ §1.1 №1: емодзі в текстах звернень зберігаються — це авторський
+// голос людей, а не інтерфейс.
+const PEOPLE = [
+  {
+    photo: "/images/people/oleg.jpg",
+    name: "Олег ГРИГОРЮК",
+    role: "Голова ПРМТУ · Амбасадор доброї волі IMO · Віце-президент IFSMA",
+    paragraphs: [
+      "Друзі, раді представити вам «Unionize» — настільну гру, яка допоможе зрозуміти, як працює профспілка і чому справжня сила — в єдності та співпраці.",
+      "У грі — реальні виклики з профспілкового життя, неочікувані повороти та командні рішення. Сподіваюся, що вона подарує вам не лише яскраві емоції, а й мотивацію ставати активними та свідомими учасниками змін.",
+      "🎲 Грай. Думай. Дій. Разом — ми сила 💪",
+    ],
+  },
+  {
+    photo: "/images/people/iryna.jpg",
+    name: "Ірина ЄРІНЕНКО",
+    role: "Голова Молодіжної ради · юрист ПРМТУ · співрозробник Unionize",
+    paragraphs: [
+      "Unionize — не про правила, а про те, як працює справжня команда і як разом можна долати будь-які виклики.",
+      "У грі ви будете приймати рішення, які показують, що лідерство — це відповідальність і підтримка один одного. Це можливість відчути як важливо бути активним і свідомим коли мова йде про твої права.",
+      "🤝 Приєднуйтесь до гри, вчіться працювати в команді і надихайтеся!",
+    ],
+  },
+  {
+    photo: "/images/people/suhrob.jpg",
+    name: "Сухроб СОБІРОВ",
+    role: "Юрист ПРМТУ · розробник Unionize",
+    paragraphs: [
+      "Ми створили Unionize щоб показати, що знати свої права — це не просто слова, а справжній спосіб захищати себе і впливати на ситуацію.",
+      "Гра допоможе розібратися як захистити працівників, навчить відповідальності за свої рішення і покаже, що разом легше долати труднощі.",
+      "⚖️ Будьте уважні, довіряйте команді і рухайтеся до перемоги разом!",
+    ],
+  },
+];
+---
+
+<section class="greetings" id="greetings">
+  <div class="container">
+    {PEOPLE.map((person, i) => (
+      <article class:list={["greeting", i % 2 === 1 && "greeting--reverse"]} data-reveal data-reveal-group="greeting">
+        <div class="greeting__photo">
+          <img src={person.photo} alt={person.name} width="320" height="320" />
+        </div>
+        <div class="greeting__text">
+          <h3 class="greeting__name">{person.name}</h3>
+          <p class="label greeting__role">{person.role}</p>
+          {person.paragraphs.map((p) => (
+            <p class="greeting__paragraph">{p}</p>
+          ))}
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .greetings {
+    padding-block: var(--space-16);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+  }
+
+  @media (min-width: 861px) {
+    .greetings {
+      padding-block: var(--space-32);
+      gap: var(--space-24);
+    }
+  }
+
+  .greeting {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 861px) {
+    .greeting {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: var(--space-12);
+    }
+
+    .greeting--reverse {
+      flex-direction: row-reverse;
+    }
+  }
+
+  .greeting__photo {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-bottom: 1px solid var(--brass);
+    position: relative;
+  }
+
+  .greeting__photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(6, 12, 18, .5));
+  }
+
+  .greeting__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(.85) contrast(1.05);
+  }
+
+  .greeting__text {
+    flex: 1 1 auto;
+  }
+
+  .greeting__name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--bone);
+    text-transform: uppercase;
+  }
+
+  .greeting__role {
+    margin-top: var(--space-2);
+    color: var(--brass);
+  }
+
+  .greeting__paragraph {
+    margin-top: var(--space-4);
+    max-width: 56ch;
+    color: var(--steel);
+  }
+</style>

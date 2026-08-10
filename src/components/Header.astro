@@ -1,0 +1,247 @@
+---
+import { NAV_ITEMS } from "../config/nav.js";
+
+const path = Astro.url.pathname;
+const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
+---
+
+<header class="header" id="site-header">
+  <div class="header__bar container">
+    <a href="/" class="header__logo">UNIONIZE</a>
+
+    <nav class="header__nav" aria-label="Основна навігація">
+      <ul>
+        {NAV_ITEMS.map((item) => (
+          <li>
+            <a href={item.href} class="header__link" aria-current={isActive(item.href) ? "page" : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <button class="header__burger" id="menu-toggle" aria-expanded="false" aria-controls="mobile-menu">
+      <span class="visually-hidden">Меню</span>
+      <span class="header__burger-icon" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <div class="header__progress" id="scroll-progress"></div>
+</header>
+
+<div class="mobile-menu" id="mobile-menu" hidden>
+  <ul>
+    {NAV_ITEMS.map((item) => (
+      <li>
+        <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>{item.label}</a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    transition: background 400ms ease, border-color 400ms ease, padding 400ms ease;
+  }
+
+  .header--scrolled {
+    background: rgba(6, 12, 18, .78);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: var(--hairline);
+  }
+
+  .header__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 18px;
+    transition: padding 400ms ease;
+  }
+
+  .header--scrolled .header__bar {
+    padding-block: 12px;
+  }
+
+  .header__logo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--bone);
+    letter-spacing: 0.02em;
+  }
+
+  .header__nav ul {
+    display: flex;
+    gap: var(--space-6);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .header__link {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.6875rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    padding-bottom: 6px;
+    border-bottom: 2px solid transparent;
+    transition: color 200ms ease;
+  }
+
+  .header__link:hover {
+    color: var(--champ);
+  }
+
+  .header__link[aria-current="page"] {
+    color: var(--bone);
+    border-bottom-color: var(--brass);
+  }
+
+  .header__burger {
+    display: none;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header__burger-icon,
+  .header__burger-icon::before,
+  .header__burger-icon::after {
+    content: "";
+    display: block;
+    width: 22px;
+    height: 1px;
+    background: var(--bone);
+    position: relative;
+  }
+
+  .header__burger-icon::before {
+    position: absolute;
+    top: -7px;
+  }
+
+  .header__burger-icon::after {
+    position: absolute;
+    top: 7px;
+  }
+
+  .header__progress {
+    height: 2px;
+    background: var(--champ);
+    width: 0%;
+    transform-origin: left;
+  }
+
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: var(--ink-800);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-menu:not([hidden]) {
+    display: flex;
+  }
+
+  .mobile-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    text-align: center;
+  }
+
+  .mobile-menu a {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 1.75rem;
+    color: var(--bone);
+  }
+
+  .mobile-menu a[aria-current="page"] {
+    color: var(--champ);
+  }
+
+  @media (max-width: 860px) {
+    .header__nav {
+      display: none;
+    }
+
+    .header__burger {
+      display: inline-flex;
+    }
+  }
+</style>
+
+<script>
+  const header = document.getElementById("site-header");
+  const progress = document.getElementById("scroll-progress");
+  let ticking = false;
+
+  function updateOnScroll() {
+    const scrollY = window.scrollY;
+    header?.classList.toggle("header--scrolled", scrollY > 60);
+
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
+    if (progress) progress.style.width = `${pct}%`;
+
+    ticking = false;
+  }
+
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!ticking) {
+        requestAnimationFrame(updateOnScroll);
+        ticking = true;
+      }
+    },
+    { passive: true }
+  );
+
+  updateOnScroll();
+
+  const toggle = document.getElementById("menu-toggle");
+  const menu = document.getElementById("mobile-menu");
+
+  function closeMenu() {
+    menu?.setAttribute("hidden", "");
+    toggle?.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
+  }
+
+  function openMenu() {
+    menu?.removeAttribute("hidden");
+    toggle?.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden";
+  }
+
+  toggle?.addEventListener("click", () => {
+    const isOpen = toggle.getAttribute("aria-expanded") === "true";
+    isOpen ? closeMenu() : openMenu();
+  });
+
+  menu?.addEventListener("click", (e) => {
+    if (e.target instanceof HTMLElement && e.target.tagName === "A") closeMenu();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMenu();
+  });
+</script>

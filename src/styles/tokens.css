@@ -1,0 +1,80 @@
+:root {
+  /* ink — основа */
+  --ink-900: #04090E;
+  --ink-800: #060C12;
+  --ink-700: #0C161F;
+  --ink-600: #16232E;
+  --bone: #F4F4F0;
+  --steel: #8FA0AE;
+  --dim: #5D6E7C;
+
+  /* латунь — акцент */
+  --champ: #E4D2A6;
+  --brass: #B9924A;
+  --brass-dk: #5C4517;
+
+  /* доповнення для першого екрана (завдання «3D-вступ», §8.1) */
+  --champ-hi: #F7ECD0;
+  --brass-lo: #4A3711;
+  --glass: rgba(18, 28, 38, .62);
+  --glass-edge: rgba(244, 244, 240, .14);
+  --halo: rgba(228, 210, 166, .28);
+  --ink-750: #0A1219;
+
+  /* значення */
+  --lyman: #22B8C6;
+  --pos: #3FBF7F;
+  --neg: #FF5A45;
+  --suryk: #C4331F;
+
+  /* папір */
+  --paper: #F0EAD9;
+  --paper-2: #DFD7C1;
+  --paper-ink: #171C22;
+  --paper-dim: #6B6350;
+  --paper-neg: #B72E1B;
+
+  /* код типів клітинок */
+  --cell-ppo: #1D63B5;
+  --cell-event: #E8871E;
+  --cell-resource: #2E9E4F;
+  --cell-bonus: #38B6D9;
+  --cell-rest: #0FA3B1;
+  --cell-crisis: #C4331F;
+  --cell-start: #F4F4F0;
+
+  /* шрифти */
+  --font-display: "Unbounded", "Kyiv Type Titling", system-ui, sans-serif;
+  --font-text: "Inter", "Fixel", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* сітка й відступи — крок 4px */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  --content-max: 1200px;
+  --text-col: 68ch;
+
+  /* радіуси — рівно чотири значення, нічого проміжного */
+  --r-0: 0;
+  --r-1: 2px;
+  --r-2: 12px;
+  --r-full: 50%;
+
+  /* межі */
+  --hairline: 1px solid rgba(244, 244, 240, 0.10);
+  --hairline-accent: 1px solid rgba(228, 210, 166, 0.28);
+
+  /* тіні — лише для трьох сутностей (§2.3) */
+  --shadow-paper: 0 40px 80px -30px rgba(0, 0, 0, .85);
+  --shadow-modal: 0 32px 64px -24px rgba(0, 0, 0, .9);
+  --shadow-brass: 0 10px 20px -5px rgba(0, 0, 0, .8);
+}

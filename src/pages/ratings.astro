@@ -1,0 +1,267 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { SEASON_LABEL } from "../config/ratings.js";
+---
+
+<BaseLayout
+  title="Рейтинги — Unionize"
+  description="Рейтинг гравців Unionize (топ-10) і навчальних закладів (сума результатів топ-5 гравців). Дані з турнірів ПРМТУ."
+>
+  <section class="ratings">
+    <div class="container">
+      <div class="ratings__header">
+        <h1 class="ratings__title">Рейтинги</h1>
+        <p class="label ratings__season">Сезон: {SEASON_LABEL}</p>
+      </div>
+
+      <div class="ratings-tabs" role="tablist">
+        <button type="button" class="ratings-tab is-active" data-tab="players" role="tab" aria-selected="true">Гравці</button>
+        <button type="button" class="ratings-tab" data-tab="institutions" role="tab" aria-selected="false">Заклади</button>
+      </div>
+
+      <div class="ratings__search" id="ratings-search-wrap" hidden>
+        <input type="search" id="ratings-search" placeholder="Знайти свій заклад" aria-label="Знайти свій заклад" />
+      </div>
+
+      <div id="ratings-players" class="ratings__panel"></div>
+      <div id="ratings-institutions" class="ratings__panel" hidden></div>
+    </div>
+  </section>
+
+  <script>
+    import "../scripts/ratings-client.ts";
+  </script>
+
+  <style>
+    .ratings {
+      padding-block: var(--space-16);
+      min-height: 60svh;
+    }
+
+    @media (min-width: 861px) {
+      .ratings {
+        padding-block: var(--space-32);
+      }
+    }
+
+    .ratings__header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-bottom: var(--space-6);
+    }
+
+    .ratings__title {
+      font-family: var(--font-display);
+      font-weight: 300;
+      font-size: clamp(2rem, 6vw, 4rem);
+      line-height: 0.96;
+      letter-spacing: -0.04em;
+    }
+
+    .ratings__season {
+      color: var(--dim);
+    }
+
+    .ratings-tabs {
+      display: flex;
+      border-bottom: var(--hairline);
+      margin-bottom: var(--space-6);
+    }
+
+    .ratings-tab {
+      padding: 12px 20px;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dim);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 200ms ease;
+    }
+
+    .ratings-tab.is-active {
+      color: var(--bone);
+      border-bottom-color: var(--brass);
+    }
+
+    .ratings__search {
+      margin-bottom: var(--space-6);
+    }
+
+    .ratings__search input {
+      width: 100%;
+      max-width: 340px;
+      padding: 10px 14px;
+      background: var(--ink-900);
+      border: var(--hairline);
+      border-radius: var(--r-1);
+      color: var(--bone);
+      font-family: var(--font-text);
+    }
+
+    .ratings__search input:focus {
+      outline: 2px solid var(--champ);
+      outline-offset: 2px;
+    }
+
+    /* Усе нижче стосується вмісту, що його вставляє ratings-client.ts через
+       innerHTML, — Astro не проставляє скоуп-атрибут динамічним вузлам,
+       тому ці правила мають бути глобальними. */
+    .ratings__panel :global(.ratings__note) {
+      color: var(--steel);
+      max-width: 56ch;
+      padding-block: var(--space-8);
+    }
+
+    .ratings__panel :global(.ratings__error) {
+      padding-block: var(--space-8);
+      color: var(--bone);
+    }
+
+    .ratings__panel :global(.ratings__error-sub) {
+      color: var(--steel);
+      margin-top: var(--space-2);
+    }
+
+    .ratings__panel :global(.ratings__retry) {
+      margin-top: var(--space-4);
+    }
+
+    /* skeleton */
+    .ratings__panel :global(.skeleton__row) {
+      height: 56px;
+      border-radius: var(--r-2);
+      margin-bottom: var(--space-2);
+      background: var(--ink-700);
+      background-image: linear-gradient(90deg, var(--ink-700) 0%, var(--ink-600) 50%, var(--ink-700) 100%);
+      background-size: 200% 100%;
+      animation: skeleton-pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes skeleton-pulse {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* podium */
+    .ratings__panel :global(.podium) {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+      margin-bottom: var(--space-6);
+    }
+
+    @media (min-width: 561px) {
+      .ratings__panel :global(.podium) {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .ratings__panel :global(.podium__card) {
+      background: var(--ink-700);
+      border-radius: var(--r-2);
+      padding: 24px 16px;
+      text-align: center;
+    }
+
+    .ratings__panel :global(.podium__card--1) {
+      border: 1px solid var(--champ);
+    }
+
+    .ratings__panel :global(.podium__place) {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 2rem;
+      color: var(--steel);
+    }
+
+    .ratings__panel :global(.podium__card--1 .podium__place) {
+      color: var(--champ);
+    }
+
+    .ratings__panel :global(.podium__name) {
+      margin-top: var(--space-2);
+      color: var(--bone);
+      font-weight: 500;
+      font-size: 0.9375rem;
+    }
+
+    .ratings__panel :global(.podium__total) {
+      margin-top: var(--space-2);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--champ);
+    }
+
+    .ratings__panel :global(.podium__sub) {
+      margin-top: 4px;
+      color: var(--dim);
+    }
+
+    @media (min-width: 561px) {
+      .ratings__panel :global(.podium__card--1) {
+        order: 2;
+        transform: translateY(-8px);
+      }
+      .ratings__panel :global(.podium__card--2) {
+        order: 1;
+      }
+      .ratings__panel :global(.podium__card--3) {
+        order: 3;
+      }
+    }
+
+    /* list */
+    .ratings__panel :global(.rlist__row) {
+      display: grid;
+      grid-template-columns: 32px 1fr auto;
+      align-items: center;
+      gap: var(--space-3);
+      padding: 14px 0;
+      border-bottom: var(--hairline);
+    }
+
+    .ratings__panel :global(.rlist__place) {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--dim);
+    }
+
+    .ratings__panel :global(.rlist__name) {
+      color: var(--bone);
+      font-weight: 500;
+    }
+
+    .ratings__panel :global(.rlist__sub) {
+      color: var(--dim);
+      font-weight: 400;
+    }
+
+    .ratings__panel :global(.rlist__total) {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--champ);
+      text-align: right;
+    }
+
+    .ratings__panel :global(.ratings__show-all) {
+      margin-top: var(--space-4);
+      width: 100%;
+    }
+
+    .ratings__panel :global(.btn-outline) {
+      padding: 10px 20px;
+      border-radius: var(--r-1);
+      border: 1px solid rgba(228, 210, 166, .4);
+      color: var(--champ);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+  </style>
+</BaseLayout>

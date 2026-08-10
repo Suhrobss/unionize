@@ -1,0 +1,191 @@
+@import "./fonts.css";
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+/* якір не має ховатись під липкою шапкою */
+section[id] {
+  scroll-margin-top: calc(var(--hdr-h, 62px) + var(--space-4));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  /* clip, а не hidden: hidden робить body контейнером прокрутки й ламає
+     position: sticky у нащадків (закріплена сцена першого екрана) */
+  overflow-x: clip;
+  background: var(--ink-800);
+  color: var(--bone);
+  font-family: var(--font-text);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Скидання нижче примусово робить ці елементи блоковими — і тим самим
+   перебиває атрибут hidden. Повертаємо йому силу, інакше прихований
+   <canvas> для картинки-поширення займає 1080×1920 просто на сторінці. */
+img[hidden],
+picture[hidden],
+svg[hidden],
+canvas[hidden] {
+  display: none;
+}
+
+img,
+picture,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+.container {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+@media (min-width: 561px) {
+  .container {
+    padding-inline: 24px;
+  }
+}
+
+@media (min-width: 861px) {
+  .container {
+    padding-inline: 32px;
+  }
+}
+
+/* мітка — вимога 1.3 ДИЗАЙН-ТЗ: тільки для міток до 4 слів, ніколи для речень */
+.label {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.label--lg {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+}
+
+/* .btn-brass / .btn-outline перенесені в buttons.css (завдання «3D-вступ» §8.2) */
+
+/* 2D-кубики фолбеку першого екрана — створюються з JS, тому глобально:
+   scoped-стилі Astro не діють на вставлені скриптом вузли */
+.die2d {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 56px;
+  height: 56px;
+  padding: 8px;
+  background: #efe8d6;
+  border: 2px solid rgba(70, 55, 20, .35);
+  border-radius: 8px;
+  box-shadow: 0 8px 18px -6px rgba(0, 0, 0, .7);
+}
+
+.die2d__pip {
+  width: 9px;
+  height: 9px;
+  margin: auto;
+  border-radius: var(--r-full);
+  background: #141a22;
+}
+
+.die2d.is-rolling {
+  animation: die-tumble2d 900ms cubic-bezier(.3, .6, .4, 1);
+}
+
+@keyframes die-tumble2d {
+  0% { transform: translateY(-140%) rotate(0deg); }
+  55% { transform: translateY(0) rotate(280deg); }
+  75% { transform: translateY(-18%) rotate(330deg); }
+  100% { transform: translateY(0) rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .die2d.is-rolling {
+    animation: none;
+  }
+}
+
+/* Поки відкрито перший екран зі сценою, плаваюча CTA мовчить: низ екрана
+   належить кубикам і стрілці «далі». Повертається разом із плашкою. */
+body:has(.hero3d:not(.is-panel):not([data-phase="static"])) .floating-cta {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* проявлення при прокрутці — ДИЗАЙН-ТЗ §11 рядок 2 */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 900ms cubic-bezier(.16, 1, .28, 1), transform 900ms cubic-bezier(.16, 1, .28, 1);
+}
+
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

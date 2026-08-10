@@ -1,0 +1,248 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import GravureScale from "../../components/instrument/GravureScale.astro";
+import archetypesData from "../../../data/archetype-questions.json";
+import archetypesList from "../../../data/archetypes.json";
+import { JOIN_FORM_URL } from "../../config/links.js";
+
+export function getStaticPaths() {
+  return archetypesList.archetypes.map((a) => ({
+    params: { slug: a.slug },
+    props: { archetype: a },
+  }));
+}
+
+const { archetype } = Astro.props;
+const bySlug = new Map(archetypesList.archetypes.map((a) => [a.slug, a]));
+const ally = bySlug.get(archetype.ally);
+const opponent = bySlug.get(archetype.opponent);
+
+
+const axisLabels = archetypesData._meta.axes as Record<string, { labels: Record<string, string> }>;
+const AXIS_TITLES: Record<string, string> = { A: "Що ти захищаєш", B: "Як ти дієш", C: "Через що ти дієш" };
+const [axisA, axisB, axisC] = archetype.code.split("-");
+const scales: { axis: string; pole: string }[] = [
+  { axis: "A", pole: axisA },
+  { axis: "B", pole: axisB },
+  { axis: "C", pole: axisC },
+];
+---
+
+<BaseLayout
+  title={`${archetype.name} — профіль профспілкової поведінки — Unionize`}
+  description={`«${archetype.motto}» — типовий профіль архетипу «${archetype.name}» у грі Unionize. ${archetype.essence}.`}
+  ogImage={`/images/archetype-og/${archetype.slug}.png`}
+>
+  <section class="a-static">
+    <div class="container">
+      <a href="/archetype" class="btn-brass a-static__cta-top">Пройти й дізнатись свій профіль</a>
+
+      <p class="label a-static__eyebrow">Типовий профіль</p>
+      <h1 class="a-static__name">{archetype.name}</h1>
+      <p class="a-static__motto">«{archetype.motto}» — {archetype.essence}</p>
+
+      <div class="a-static__scales">
+        {scales.map((s) => (
+          <div class="a-scale-row">
+            <div class="a-scale-row__head">
+              <span>{AXIS_TITLES[s.axis]}</span>
+              <span class="label">{axisLabels[s.axis].labels[s.pole]} · 80%</span>
+            </div>
+            <GravureScale percent={80} />
+          </div>
+        ))}
+      </div>
+
+      <div class="a-static__block">
+        {archetype.aboutYou.map((p) => (
+          <p class="a-static__p">{p}</p>
+        ))}
+      </div>
+
+      <div class="a-static__block">
+        <p class="label a-static__heading">Сила</p>
+        <ul class="a-static__list">
+          {archetype.strengths.map((s) => (
+            <li>{s}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="a-static__block a-static__blindspot">
+        <p class="label a-static__heading">Сліпа зона</p>
+        <ul class="a-static__list">
+          {archetype.blindSpot.map((s) => (
+            <li>{s}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="a-static__block">
+        <p class="label a-static__heading">Як грає в Unionize</p>
+        <p class="a-static__p">{archetype.howYouPlay}</p>
+      </div>
+
+      {(ally || opponent) && (
+        <div class="a-static__block a-static__pair">
+          {ally && (
+            <div class="a-pair-card a-pair-card--ally">
+              <p class="label">Союзник</p>
+              <a href={`/archetype/${ally.slug}`}>{ally.name}</a>
+            </div>
+          )}
+          {opponent && (
+            <div class="a-pair-card a-pair-card--opponent">
+              <p class="label">Опонент</p>
+              <a href={`/archetype/${opponent.slug}`}>{opponent.name}</a>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div class="a-static__block a-static__life">
+        <p class="label">Що це означає в житті</p>
+        <p class="a-static__p">{archetype.lifeMeaning}</p>
+        <a href={JOIN_FORM_URL} target="_blank" rel="noopener" class="btn-brass">Стати частиною ПРМТУ</a>
+      </div>
+
+      <a href="/archetype" class="btn-brass a-static__cta-bottom">Пройти й дізнатись свій профіль</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .a-static {
+    padding-block: var(--space-16);
+    max-width: 720px;
+  }
+
+  .a-static__cta-top {
+    margin-bottom: var(--space-8);
+  }
+
+  .a-static__eyebrow {
+    color: var(--dim);
+  }
+
+  .a-static__name {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(2.4rem, 9vw, 5rem);
+    color: var(--bone);
+  }
+
+  .a-static__motto {
+    margin-top: var(--space-2);
+    color: var(--steel);
+    font-style: italic;
+  }
+
+  .a-static__scales {
+    margin-top: var(--space-8);
+  }
+
+  .a-scale-row + .a-scale-row {
+    margin-top: var(--space-6);
+  }
+
+  .a-scale-row__head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+    color: var(--bone);
+    font-weight: 500;
+  }
+
+  .a-static__block {
+    padding-block: 48px;
+    border-bottom: var(--hairline);
+    max-width: 60ch;
+  }
+
+  .a-static__p {
+    color: var(--bone);
+    margin-top: var(--space-4);
+  }
+
+  .a-static__p:first-child {
+    margin-top: 0;
+  }
+
+  .a-static__heading {
+    color: var(--dim);
+    margin-bottom: var(--space-3);
+  }
+
+  .a-static__list {
+    margin: 0;
+    padding-left: 1.1em;
+    color: var(--bone);
+  }
+
+  .a-static__list li {
+    margin-top: var(--space-2);
+  }
+
+  .a-static__blindspot {
+    border: 1px solid rgba(196, 51, 31, .35);
+    border-radius: var(--r-2);
+    padding: 24px;
+  }
+
+  .a-static__pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+
+  .a-pair-card {
+    padding-left: var(--space-3);
+    border-left: 2px solid var(--pos);
+  }
+
+  .a-pair-card--opponent {
+    border-left-color: var(--neg);
+  }
+
+  .a-pair-card a {
+    display: block;
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--champ);
+  }
+
+  .a-static__life {
+    background: var(--paper);
+    color: var(--paper-ink);
+    border-radius: var(--r-1);
+    padding: 28px 24px;
+    border-bottom: none;
+    box-shadow: var(--shadow-paper);
+  }
+
+  .a-static__life .a-static__p {
+    color: var(--paper-ink);
+    max-width: 56ch;
+  }
+
+  .a-static__life .btn-brass {
+    display: inline-flex;
+    margin-top: var(--space-6);
+    text-decoration: none;
+  }
+
+  .a-static__cta-bottom {
+    margin-top: var(--space-8);
+    display: inline-flex;
+    text-decoration: none;
+  }
+
+  @media (max-width: 560px) {
+    .a-static__pair {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+  }
+</style>

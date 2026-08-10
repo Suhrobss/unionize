@@ -1,0 +1,251 @@
+---
+import Modal from "../Modal.astro";
+import { CELL_TYPE_ORDER, CELL_TYPES } from "../../config/cellTypes.js";
+---
+
+<section class="board-page">
+  <div class="container">
+    <h1 class="board-page__title">Живе поле</h1>
+    <p class="board-page__lede">
+      Клітинки ППО — реальні навчальні заклади й підприємства. Торкніться клітинки, щоб дізнатися вартість,
+      внесок і зв'язок із профспілкою.
+    </p>
+
+    <div class="board-layout">
+      <div class="board-visual" id="board-visual">
+        <div class="board-visual__frame">
+          {/* board-tex.jpg — 1280px. Оригінал board.jpg важить 11,5 МБ і
+              для показу в макеті непридатний; повний масштаб — у режимі
+              «Дивитись поле», де вантажиться board-lg.jpg */}
+          <img
+            src="/images/board/board-tex.jpg"
+            alt="Ігрове поле Unionize"
+            class="board-visual__img"
+            width="1280"
+            height="1280"
+          />
+          <div class="board-visual__hotspots" id="board-hotspots"></div>
+        </div>
+      </div>
+
+      <div class="board-list-wrap">
+        <div class="board-filter" id="board-filter">
+          <button type="button" class="chip is-active" data-type-filter="all">Усі</button>
+          {(CELL_TYPE_ORDER as string[]).map((type) => (
+            <button
+              type="button"
+              class="chip"
+              data-type-filter={type}
+              style={`--chip-color: ${(CELL_TYPES as Record<string, { color: string }>)[type].color}`}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+        <div class="board-list" id="board-list"></div>
+      </div>
+    </div>
+
+    <button type="button" class="btn-outline board-view-toggle" id="board-view-toggle">Дивитись поле</button>
+  </div>
+</section>
+
+<div class="board-fullscreen" id="board-fullscreen" hidden>
+  <button type="button" class="board-fullscreen__close" id="board-fullscreen-close" aria-label="Закрити поле">
+    <span aria-hidden="true">✕</span>
+  </button>
+  <div class="board-fullscreen__viewport" id="board-fullscreen-viewport">
+    <div class="board-fullscreen__stage" id="board-fullscreen-stage">
+      <img
+        src="/images/board/board-lg.jpg"
+        alt="Ігрове поле Unionize"
+        class="board-fullscreen__img"
+        width="2000"
+        height="2000"
+        loading="lazy"
+      />
+      <div class="board-visual__hotspots" id="board-fullscreen-hotspots"></div>
+    </div>
+  </div>
+</div>
+
+<Modal id="cell-modal" />
+
+<style>
+  .board-page {
+    padding-block: var(--space-16);
+    min-height: 60svh;
+  }
+
+  @media (min-width: 861px) {
+    .board-page {
+      padding-block: var(--space-32);
+    }
+  }
+
+  .board-page__title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 6vw, 4rem);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+    margin-bottom: var(--space-3);
+  }
+
+  .board-page__lede {
+    max-width: 60ch;
+    color: var(--steel);
+    margin-bottom: var(--space-6);
+  }
+
+  .board-layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .board-visual {
+    display: none;
+  }
+
+  @media (min-width: 861px) {
+    .board-layout {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+
+    .board-visual {
+      display: block;
+      flex: 0 0 auto;
+      width: min(62vw, 720px);
+    }
+  }
+
+  .board-visual__frame {
+    position: relative;
+    aspect-ratio: 1;
+    border: 1px solid var(--brass);
+    box-shadow: 0 60px 90px -46px rgba(0, 0, 0, .9);
+    overflow: hidden;
+  }
+
+  .board-visual__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .board-visual__hotspots {
+    position: absolute;
+    inset: 0;
+  }
+
+  .board-list-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  @media (min-width: 861px) {
+    .board-list-wrap {
+      width: 340px;
+      flex: 0 0 340px;
+    }
+  }
+
+  .board-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding-block: var(--space-2);
+    background: var(--ink-800);
+  }
+
+  @media (min-width: 561px) {
+    .board-filter {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+  }
+
+  .chip {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: var(--r-1);
+    border: var(--hairline);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+  }
+
+  .chip.is-active {
+    background: var(--chip-color, var(--champ));
+    border-color: var(--chip-color, var(--champ));
+    color: var(--ink-900);
+  }
+
+  .board-view-toggle {
+    margin-top: var(--space-6);
+    width: 100%;
+  }
+
+  @media (min-width: 861px) {
+    .board-view-toggle {
+      display: none;
+    }
+  }
+
+  /* fullscreen mobile board */
+  .board-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: var(--ink-900);
+    touch-action: none;
+  }
+
+  .board-fullscreen__viewport {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .board-fullscreen__stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    transform-origin: center center;
+    will-change: transform;
+  }
+
+  .board-fullscreen__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .board-fullscreen__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bone);
+    background: var(--ink-700);
+    border-radius: var(--r-full);
+  }
+</style>

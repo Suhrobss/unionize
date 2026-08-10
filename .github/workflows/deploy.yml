@@ -1,0 +1,60 @@
+name: Публікація на GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # дозволяє запустити публікацію вручну зі вкладки Actions
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Одночасно виконується лише одна публікація; нову чергу не обриваємо,
+# щоб не залишити сайт наполовину оновленим.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Забрати код
+        uses: actions/checkout@v4
+
+      - name: Поставити Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Встановити залежності
+        run: npm ci
+
+      # npm run build = astro check && astro build, тож типи перевіряються тут же
+      - name: Зібрати сайт
+        run: npm run build
+
+      - name: Підготувати GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          # вмикає Pages у налаштуваннях репозиторію автоматично
+          enablement: true
+
+      - name: Завантажити збірку
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Опублікувати
+        id: deployment
+        uses: actions/deploy-pages@v4

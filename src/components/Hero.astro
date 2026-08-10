@@ -1,0 +1,492 @@
+---
+// Перший екран — жива сцена з полем і кубиками (затверджений виняток із
+// ДИЗАЙН-ТЗ, діє тільки тут).
+//
+// Екран 1: сцена, кубики кидаються скільки завгодно разів, щоразу нові числа.
+// Екран 2: та сама сцена лишається закріпленою, а поверх неї, у міру
+// прокрутки, проявляється плашка з назвою гри й переходами.
+//
+// Без WebGL працює 2D-фолбек; без JavaScript видно постер і плашку одразу.
+const SOLID = "UNION".split("");
+const OUTLINE = "IZE".split("");
+---
+
+<section class="hero3d" id="hero" data-phase="static">
+  <div class="hero3d__stage" data-hero-stage>
+    <div class="hero3d__poster" data-hero-poster aria-hidden="true"></div>
+    <canvas class="hero3d__canvas" data-hero-canvas aria-hidden="true"></canvas>
+
+    <div class="hero3d__vignette" aria-hidden="true"></div>
+    <svg class="hero3d__grain" aria-hidden="true">
+      <filter id="hero-grain">
+        <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="4" stitchTiles="stitch" />
+      </filter>
+      <rect width="100%" height="100%" filter="url(#hero-grain)" />
+    </svg>
+
+    <div class="hero3d__loadtrack" aria-hidden="true">
+      <div class="hero3d__loadbar" data-hero-loadbar></div>
+    </div>
+
+    <!-- Екран 1: кубики -->
+    <div class="hero3d__scene-ui" data-hero-scene-ui>
+      <p class="label hero3d__hint">Кожна партія починається з кидка</p>
+      <div class="hero3d__dice2d" data-hero-dice2d aria-hidden="true"></div>
+      <button type="button" class="btn-brass" data-hero-roll>Кинути кубики</button>
+    </div>
+
+    <button type="button" class="hero3d__scroll" data-hero-scroll-down aria-label="Далі — до опису гри">
+      <span class="label">Далі</span>
+      <span class="hero3d__scroll-arrow" aria-hidden="true">↓</span>
+    </button>
+
+    <!-- Екран 2: плашка з назвою поверх сцени -->
+    <div class="hero3d__panel" data-hero-panel>
+      <span class="hero3d__screw hero3d__screw--l" aria-hidden="true"></span>
+      <span class="hero3d__screw hero3d__screw--r" aria-hidden="true"></span>
+
+      <p class="label hero3d__eyebrow">ПРМТУ · Настільна гра морської галузі</p>
+
+      <h1 class="hero3d__wordmark" aria-label="UNIONIZE">
+        {SOLID.map((letter, i) => (
+          <span class="hero3d__letter" style={{ animationDelay: `${i * 50}ms` }} aria-hidden="true">{letter}</span>
+        ))}
+        {OUTLINE.map((letter, i) => (
+          <span class="hero3d__letter hero3d__letter--outline" style={{ animationDelay: `${(i + 5) * 50}ms` }} aria-hidden="true">{letter}</span>
+        ))}
+      </h1>
+
+      <p class="hero3d__lead">
+        Гра про те, як працює профспілка.<br />
+        <span class="hero3d__lead-accent">Гроші ростуть. <span class="hero3d__outline-text">Повагу не купиш.</span></span>
+      </p>
+
+      <div class="hero3d__actions">
+        <a href="#goal" class="btn-brass">Дізнатися про гру</a>
+        <a href="/rules" class="btn-outline">Правила</a>
+        <a href="/archetype" class="btn-outline">Пройти тест</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  // Синхронно, ще під час парсингу: з JS переходимо у фазу завантаження
+  // і знімаємо точну висоту шапки, під яку заводиться сцена.
+  (function () {
+    var hero = document.getElementById("hero");
+    if (!hero) return;
+    hero.dataset.phase = "loading";
+    var header = document.querySelector("header");
+    if (header) {
+      document.documentElement.style.setProperty("--hdr-h", header.offsetHeight + "px");
+    }
+  })();
+</script>
+
+<script>
+  import { queryHud, bindScrollProgress, bindScrollDown } from "../hero/hud.js";
+
+  const root = document.getElementById("hero");
+  if (root && root.dataset.phase === "loading") {
+    const hud = queryHud(root);
+    bindScrollDown(hud);
+
+    // Плашка з'являється при прокрутці незалежно від того, чи піднялась сцена
+    let onScroll: ((p: number) => void) | null = null;
+    bindScrollProgress(hud, (p: number) => onScroll?.(p));
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let webgl = false;
+    try {
+      const c = document.createElement("canvas");
+      webgl = !!(c.getContext("webgl2") || c.getContext("webgl"));
+    } catch {
+      webgl = false;
+    }
+
+    let booted = false;
+    const boot = async () => {
+      if (booted) return;
+      booted = true;
+      const bar = root.querySelector<HTMLElement>("[data-hero-loadbar]");
+      if (bar) bar.style.width = "40%";
+      try {
+        if (webgl && !reduced) {
+          const m = await import("../hero/intro.js");
+          const handle = m.initIntro(root);
+          onScroll = handle?.onScroll ?? null;
+        } else {
+          const m = await import("../hero/fallback.js");
+          m.initFallback(root, { reduced });
+        }
+      } catch (err) {
+        // Помилку користувачу не показуємо — тільки в консоль
+        console.error("[hero] сцена недоступна, вмикаю фолбек:", err);
+        try {
+          const m = await import("../hero/fallback.js");
+          m.initFallback(root, { reduced });
+        } catch (err2) {
+          console.error(err2);
+          root.dataset.phase = "static";
+        }
+      }
+    };
+
+    // Ліниве завантаження сцени — після першого відмальовування
+    const start = () => requestAnimationFrame(boot);
+    if (document.readyState === "complete") {
+      start();
+    } else {
+      window.addEventListener("load", start, { once: true });
+      // страховка: один повільний субресурс не має тримати сцену вічно
+      window.setTimeout(start, 2500);
+    }
+  }
+</script>
+
+<style>
+  /* Секція — два екрани заввишки: перший тримає сцену закріпленою,
+     другий дає їй місце для прокрутки, поки проявляється плашка. */
+  .hero3d {
+    position: relative;
+    height: 200svh;
+    margin-top: calc(-1 * var(--hdr-h, 62px));
+    --hero-scene: 1;
+    --hero-panel: 0;
+  }
+
+  .hero3d__stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: hidden;
+    background: var(--ink-800);
+  }
+
+  /* --- шари сцени --- */
+  .hero3d__poster {
+    position: absolute;
+    inset: 0;
+    background: var(--ink-800) url("/images/hero/poster.webp") center / cover no-repeat;
+    transition: opacity 700ms ease;
+  }
+
+  .hero3d__poster.is-gone {
+    opacity: 0;
+  }
+
+  .hero3d__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 700ms ease;
+  }
+
+  .hero3d__canvas.is-live {
+    opacity: 1;
+  }
+
+  .hero3d.is-2d .hero3d__canvas {
+    display: none;
+  }
+
+  /* --- зерно й віньєтка: над сценою, під інтерфейсом --- */
+  .hero3d__vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 88% 78% at 50% 42%,
+      transparent 42%,
+      rgba(6, 12, 18, .62) 82%,
+      var(--ink-800) 100%
+    );
+  }
+
+  /* У фолбеку замість тривимірної сцени стоїть постер: він яскравіший за
+     сцену, тому низ додатково притемнюється — інакше підказка й кубики
+     втрачають контраст на світлому полі. */
+  .hero3d.is-2d .hero3d__vignette {
+    background:
+      linear-gradient(to top, rgba(6, 12, 18, .88), rgba(6, 12, 18, .2) 34%, transparent 52%),
+      radial-gradient(
+        ellipse 88% 78% at 50% 42%,
+        transparent 42%,
+        rgba(6, 12, 18, .62) 82%,
+        var(--ink-800) 100%
+      );
+  }
+
+  .hero3d__grain {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: .05;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+
+  /* --- смуга завантаження --- */
+  .hero3d__loadtrack {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: rgba(228, 210, 166, .12);
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+
+  .hero3d[data-phase="loading"] .hero3d__loadtrack {
+    opacity: 1;
+  }
+
+  .hero3d__loadbar {
+    height: 100%;
+    width: 15%;
+    background: var(--champ);
+    transition: width 600ms ease, opacity 400ms ease;
+  }
+
+  /* --- екран 1: кубики --- */
+  .hero3d__scene-ui {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 14vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    padding-inline: var(--space-4);
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 500ms ease;
+  }
+
+  .hero3d[data-phase="scene"] .hero3d__scene-ui,
+  .hero3d[data-phase="rolling"] .hero3d__scene-ui {
+    opacity: var(--hero-scene);
+  }
+
+  /* клікабельне тільки поки видиме. Клавіатурний фокус не перебиває
+     прозорість — замість цього hud.js доводить сторінку прокруткою
+     до того екрана, якому належить елемент. */
+  .hero3d.scene-live .hero3d__scene-ui {
+    pointer-events: auto;
+  }
+
+  .hero3d[data-phase="loading"] .hero3d__scene-ui,
+  .hero3d[data-phase="static"] .hero3d__scene-ui {
+    visibility: hidden;
+  }
+
+  .hero3d__hint {
+    color: var(--steel);
+    text-shadow: 0 4px 24px rgba(0, 0, 0, .9);
+  }
+
+  .hero3d__dice2d {
+    display: none;
+    justify-content: center;
+    gap: var(--space-4);
+  }
+
+  .hero3d.is-2d .hero3d__dice2d {
+    display: flex;
+  }
+
+  /* --- стрілка «далі» --- */
+  .hero3d__scroll {
+    position: absolute;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 14px;
+    border: 0;
+    border-radius: var(--r-1);
+    background: transparent;
+    color: var(--dim);
+    cursor: pointer;
+    opacity: var(--hero-scene);
+    transition: color 240ms ease, opacity 500ms ease;
+  }
+
+  .hero3d[data-phase="loading"] .hero3d__scroll,
+  .hero3d[data-phase="static"] .hero3d__scroll {
+    visibility: hidden;
+  }
+
+  .hero3d__scroll:hover {
+    color: var(--champ);
+  }
+
+  .hero3d__scroll:focus-visible {
+    outline: 2px solid var(--bone);
+    outline-offset: 3px;
+  }
+
+  .hero3d__scroll-arrow {
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  /* --- екран 2: плашка --- */
+  .hero3d__panel {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(92vw, 620px);
+    text-align: center;
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(18px) saturate(1.1);
+    backdrop-filter: blur(18px) saturate(1.1);
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--r-2);
+    padding: 26px 26px 28px;
+    box-shadow:
+      0 40px 90px -34px #000,
+      inset 0 1px 0 rgba(244, 244, 240, .13);
+    opacity: var(--hero-panel);
+    transform: translate(-50%, calc(-50% + (1 - var(--hero-panel)) * 34px));
+    pointer-events: none;
+  }
+
+  .hero3d.panel-live .hero3d__panel,
+  .hero3d[data-phase="static"] .hero3d__panel {
+    pointer-events: auto;
+  }
+
+  .hero3d[data-phase="static"] .hero3d__panel {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+  }
+
+  .hero3d__screw {
+    position: absolute;
+    top: 10px;
+    width: 9px;
+    height: 9px;
+    border-radius: var(--r-full);
+    background: radial-gradient(circle at 34% 30%, #8E9AA4, #2E3B45 62%, #131C23);
+  }
+
+  .hero3d__screw--l { left: 10px; }
+  .hero3d__screw--r { right: 10px; }
+
+  .hero3d__eyebrow {
+    color: var(--dim);
+    font-size: 11px;
+    letter-spacing: .2em;
+  }
+
+  .hero3d__wordmark {
+    margin-top: var(--space-3);
+    font-family: var(--font-display);
+    /* стеля 64px: вісім літер Unbounded мусять лишитись в одному рядку */
+    font-size: clamp(2.4rem, 9vw, 64px);
+    line-height: .86;
+    letter-spacing: -.045em;
+    white-space: nowrap;
+    text-shadow: 0 10px 50px rgba(0, 0, 0, .7);
+  }
+
+  .hero3d__letter {
+    display: inline-block;
+    font-weight: 900;
+    color: var(--bone);
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  /* виїзд літер — коли плашка вперше виходить на екран */
+  .hero3d.is-panel .hero3d__letter {
+    animation: hero-letter-in 900ms cubic-bezier(.16, 1, .28, 1) forwards;
+  }
+
+  .hero3d[data-phase="static"] .hero3d__letter {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero3d__letter--outline {
+    font-weight: 300;
+    color: transparent;
+    -webkit-text-stroke: 1.4px var(--bone);
+  }
+
+  @keyframes hero-letter-in {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .hero3d__lead {
+    margin-top: var(--space-6);
+    max-width: 44ch;
+    margin-inline: auto;
+    font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+    line-height: 1.5;
+    color: var(--steel);
+  }
+
+  .hero3d__lead-accent {
+    color: var(--bone);
+    font-weight: 600;
+  }
+
+  .hero3d__outline-text {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--bone);
+  }
+
+  .hero3d__actions {
+    margin-top: var(--space-6);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+  }
+
+  @media (max-width: 560px) {
+    .hero3d__actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .hero3d__panel {
+      padding: 22px 18px 24px;
+    }
+
+    .hero3d__scene-ui {
+      bottom: 18vh;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero3d__poster,
+    .hero3d__canvas,
+    .hero3d__scene-ui,
+    .hero3d__scroll {
+      transition: none;
+    }
+
+    .hero3d.is-panel .hero3d__letter {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

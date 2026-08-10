@@ -1,0 +1,263 @@
+---
+// Маяк і частинки — один об'єднаний атмосферний елемент (ІДЕЇ-ТЗ §1.1 №10).
+// Нічний силует: темна вежа з латунним рим-лайтом, ліхтар світиться,
+// широкий м'який промінь повільно обводить горизонт і підсвічує пил.
+const DUST_COUNT = 60;
+const dust = Array.from({ length: DUST_COUNT }, (_, i) => ({
+  offset: 10 + Math.random() * 80, // % довжини променя
+  lane: 20 + Math.random() * 60, // % висоти променя (у конусі)
+  size: 1 + Math.random() * 2,
+  opacity: 0.12 + Math.random() * 0.28,
+  duration: 5 + Math.random() * 6,
+  delay: Math.random() * -10,
+  mobileOnly: i >= 24 ? "dust--desktop-only" : "",
+}));
+---
+
+<div class="lighthouse" id="lighthouse">
+  <svg class="lighthouse__svg" viewBox="0 0 220 200" aria-hidden="true">
+    <defs>
+      <linearGradient id="lh-tower" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#16232E" />
+        <stop offset="1" stop-color="#060C12" />
+      </linearGradient>
+      <filter id="lh-soft" x="-80%" y="-80%" width="260%" height="260%">
+        <feGaussianBlur stdDeviation="3.2" />
+      </filter>
+    </defs>
+
+    <!-- скелі під вежею -->
+    <path d="M14,200 Q36,180 58,187 Q84,178 108,200 Z" fill="#04090E" />
+    <path d="M24,200 Q44,188 62,192 Q82,186 98,200 Z" fill="#0A1219" />
+
+    <!-- вежа: звужений силует -->
+    <path
+      d="M47,188 C50,140 52,96 54,58 L66,58 C68,96 70,140 73,188 Z"
+      fill="url(#lh-tower)"
+    />
+    <!-- рим-лайт від ліхтаря: тонка латунна кромка -->
+    <path
+      d="M47,188 C50,140 52,96 54,58"
+      fill="none"
+      stroke="rgba(228,210,166,.4)"
+      stroke-width="1"
+    />
+    <path
+      d="M73,188 C70,140 68,96 66,58"
+      fill="none"
+      stroke="rgba(228,210,166,.14)"
+      stroke-width="1"
+    />
+    <!-- гравійовані пояси -->
+    <line x1="50.5" y1="112" x2="69.5" y2="112" stroke="rgba(228,210,166,.16)" stroke-width="1" />
+    <line x1="49.2" y1="140" x2="70.8" y2="140" stroke="rgba(228,210,166,.13)" stroke-width="1" />
+    <line x1="48" y1="166" x2="72" y2="166" stroke="rgba(228,210,166,.1)" stroke-width="1" />
+
+    <!-- галерея з перилами -->
+    <rect x="45" y="54" width="30" height="3" rx="1" fill="#16232E" stroke="rgba(228,210,166,.3)" stroke-width=".6" />
+    <line x1="47" y1="54" x2="47" y2="46" stroke="rgba(228,210,166,.28)" stroke-width=".8" />
+    <line x1="53" y1="54" x2="53" y2="46" stroke="rgba(228,210,166,.22)" stroke-width=".8" />
+    <line x1="60" y1="54" x2="60" y2="46" stroke="rgba(228,210,166,.22)" stroke-width=".8" />
+    <line x1="67" y1="54" x2="67" y2="46" stroke="rgba(228,210,166,.22)" stroke-width=".8" />
+    <line x1="73" y1="54" x2="73" y2="46" stroke="rgba(228,210,166,.28)" stroke-width=".8" />
+    <line x1="46" y1="46" x2="74" y2="46" stroke="rgba(228,210,166,.3)" stroke-width=".8" />
+
+    <!-- ліхтарна кімната -->
+    <rect x="51" y="32" width="18" height="14" rx="1" fill="#0C161F" stroke="rgba(228,210,166,.35)" stroke-width=".8" />
+    <!-- сяйво лампи -->
+    <circle class="lighthouse__lantern-glow" cx="60" cy="39" r="8" fill="rgba(228,210,166,.55)" filter="url(#lh-soft)" />
+    <circle class="lighthouse__lantern" cx="60" cy="39" r="3.2" fill="#F7ECD0" />
+    <!-- дах і шпиль -->
+    <path d="M50,32 L60,21 L70,32 Z" fill="#16232E" stroke="rgba(228,210,166,.3)" stroke-width=".7" />
+    <line x1="60" y1="21" x2="60" y2="15" stroke="rgba(228,210,166,.5)" stroke-width="1" />
+    <circle cx="60" cy="14" r="1.4" fill="rgba(228,210,166,.6)" />
+  </svg>
+
+  <!-- ореол навколо ліхтаря -->
+  <div class="lighthouse__halo" aria-hidden="true"></div>
+
+  <!-- промінь: широкий м'який конус + яскраве ядро, обертаються разом -->
+  <div class="lighthouse__beam">
+    <div class="lighthouse__beam-soft"></div>
+    <div class="lighthouse__beam-core"></div>
+    {dust.map((d) => (
+      <span
+        class:list={["lighthouse__dust", d.mobileOnly]}
+        style={{
+          left: `${d.offset}%`,
+          top: `${d.lane}%`,
+          width: `${d.size}px`,
+          height: `${d.size}px`,
+          opacity: d.opacity,
+          animationDuration: `${d.duration}s`,
+          animationDelay: `${d.delay}s`,
+        }}
+      ></span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .lighthouse {
+    position: relative;
+    height: 140px;
+    overflow: hidden;
+    pointer-events: none;
+    /* якір ліхтаря: x = 6% + (60/220 від ширини svg), svg-ширина = height×1.1 */
+    --lh-x: calc(6% + 42px);
+    --lh-y: 71%; /* (200−39)/200 ≈ 80% від низу svg, мінус запас конуса */
+  }
+
+  @media (min-width: 861px) {
+    .lighthouse {
+      height: 200px;
+      --lh-x: calc(6% + 60px);
+    }
+  }
+
+  .lighthouse__svg {
+    position: absolute;
+    left: 6%;
+    bottom: 0;
+    height: 100%;
+    width: auto;
+  }
+
+  .lighthouse__lantern {
+    animation: lantern-flash 4s ease-in-out infinite;
+  }
+
+  .lighthouse__lantern-glow {
+    animation: lantern-flash 4s ease-in-out infinite;
+  }
+
+  .lighthouse__halo {
+    position: absolute;
+    left: var(--lh-x);
+    bottom: var(--lh-y);
+    width: 110px;
+    height: 110px;
+    transform: translate(-50%, 50%);
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(228, 210, 166, .32),
+      rgba(228, 210, 166, .08) 45%,
+      transparent 72%
+    );
+    animation: lantern-flash 4s ease-in-out infinite;
+  }
+
+  .lighthouse__beam {
+    position: absolute;
+    left: var(--lh-x);
+    bottom: calc(var(--lh-y) - 70px);
+    width: 74vw;
+    max-width: 960px;
+    height: 140px;
+    transform-origin: left center;
+    transform: rotate(-4deg);
+    animation: beam-sweep 22s ease-in-out infinite;
+  }
+
+  .lighthouse__beam-soft {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(228, 210, 166, .3),
+      rgba(228, 210, 166, .07) 55%,
+      transparent 92%
+    );
+    clip-path: polygon(0 46%, 100% 0, 100% 100%, 0 54%);
+    filter: blur(9px);
+  }
+
+  .lighthouse__beam-core {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(247, 236, 208, .5),
+      rgba(228, 210, 166, .1) 58%,
+      transparent 86%
+    );
+    clip-path: polygon(0 49%, 100% 36%, 100% 64%, 0 51%);
+    filter: blur(1.5px);
+  }
+
+  .lighthouse__dust {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--champ);
+    animation: dust-drift linear infinite;
+  }
+
+  @keyframes lantern-flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .4; }
+  }
+
+  @keyframes beam-sweep {
+    0% { transform: rotate(-13deg); }
+    50% { transform: rotate(7deg); }
+    100% { transform: rotate(-13deg); }
+  }
+
+  @keyframes dust-drift {
+    0% { transform: translateY(6px); }
+    50% { transform: translateY(-6px); }
+    100% { transform: translateY(6px); }
+  }
+
+  .lighthouse.is-offscreen .lighthouse__lantern,
+  .lighthouse.is-offscreen .lighthouse__lantern-glow,
+  .lighthouse.is-offscreen .lighthouse__halo,
+  .lighthouse.is-offscreen .lighthouse__beam,
+  .lighthouse.is-offscreen .lighthouse__dust {
+    animation-play-state: paused;
+  }
+
+  @media (max-width: 860px) {
+    .lighthouse__beam {
+      animation: none;
+      transform: rotate(-5deg);
+      height: 90px;
+      bottom: calc(var(--lh-y) - 45px);
+    }
+
+    .dust--desktop-only {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lighthouse__lantern,
+    .lighthouse__lantern-glow,
+    .lighthouse__halo {
+      animation: none;
+      opacity: 1;
+    }
+
+    .lighthouse__beam {
+      animation: none;
+    }
+
+    .lighthouse__dust {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const el = document.getElementById("lighthouse");
+  if (el && "IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        el.classList.toggle("is-offscreen", !entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+    observer.observe(el);
+  }
+</script>

@@ -1,0 +1,15 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ArchetypeSection from "../components/archetype/ArchetypeSection.astro";
+---
+
+<BaseLayout
+  title="Профспілковий архетип — Unionize"
+  description="Профіль профспілкової поведінки за 12 ситуаціями з гри Unionize. 8 архетипів, дві хвилини, картка для сторіз."
+>
+  <ArchetypeSection />
+</BaseLayout>
+
+<script>
+  import "../scripts/archetype-client.ts";
+</script>

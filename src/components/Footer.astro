@@ -1,0 +1,118 @@
+---
+import { FOOTER_LINKS } from "../config/links.js";
+---
+
+<footer class="footer">
+  <div class="footer__body container">
+    <div class="footer__about">
+      <p class="footer__wordmark">UNIONIZE</p>
+      <p class="footer__tagline">Навчальна профспілкова гра ПРМТУ</p>
+    </div>
+
+    <div class="footer__links">
+      <p class="label">Корисні посилання</p>
+      <ul>
+        {FOOTER_LINKS.map((link) => (
+          <li>
+            <a href={link.url} target="_blank" rel="noopener">
+              {link.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer__bottom container">
+    <p class="label">© 2026 Unionize · ПРМТУ</p>
+    <a href="/tasks" class="label footer__tasks-link">Додаткова можливість →</a>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: var(--hairline);
+  }
+
+  .footer__body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+    padding-block: var(--space-16);
+  }
+
+  .footer__wordmark {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--bone);
+  }
+
+  .footer__tagline {
+    color: var(--steel);
+    margin-top: var(--space-2);
+  }
+
+  .footer__links ul {
+    list-style: none;
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .footer__links a {
+    position: relative;
+    display: inline-block;
+    color: var(--bone);
+    font-weight: 500;
+    padding-left: 0;
+    transition: color 200ms ease, padding-left 200ms ease;
+  }
+
+  .footer__links a::before {
+    content: "";
+    position: absolute;
+    left: -14px;
+    top: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--brass);
+    transition: width 200ms ease;
+  }
+
+  .footer__links a:hover {
+    color: var(--champ);
+    padding-left: 20px;
+  }
+
+  .footer__links a:hover::before {
+    width: 12px;
+  }
+
+  .footer__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding-block: var(--space-6);
+    border-top: var(--hairline);
+    color: var(--dim);
+  }
+
+  .footer__tasks-link {
+    color: var(--dim);
+  }
+
+  .footer__tasks-link:hover {
+    color: var(--champ);
+  }
+
+  @media (max-width: 860px) {
+    .footer__body {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,60 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import FaqAccordion from "../components/FaqAccordion.astro";
+import RulesCalculator from "../components/RulesCalculator.astro";
+---
+
+<BaseLayout
+  title="Правила — Unionize"
+  description="Повні правила настільної гри Unionize: відповіді на часті питання про клітинки, ППО, аукціони й перемогу, і калькулятор підсумкового результату гравця."
+>
+  <FaqAccordion />
+  <RulesCalculator />
+
+  <section class="rules-cta">
+    <div class="container rules-cta__inner" data-reveal>
+      <div>
+        <p class="label rules-cta__label">Пункт 7 правил</p>
+        <p class="rules-cta__text">Менше 1000 UC сумарних активів за столом? Є додаткова можливість поповнити рахунок.</p>
+      </div>
+      <a href="/tasks" class="btn-outline">Додаткова можливість →</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .rules-cta {
+    padding-block: var(--space-16);
+    border-top: var(--hairline);
+  }
+
+  .rules-cta__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .rules-cta__label {
+    color: var(--dim);
+    margin-bottom: var(--space-2);
+  }
+
+  .rules-cta__text {
+    color: var(--steel);
+    max-width: 48ch;
+  }
+
+  .btn-outline {
+    flex-shrink: 0;
+    padding: 12px 22px;
+    border-radius: var(--r-1);
+    border: 1px solid rgba(228, 210, 166, .4);
+    color: var(--champ);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+</style>

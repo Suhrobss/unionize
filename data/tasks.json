@@ -1,0 +1,76 @@
+{
+  "_meta": {
+    "version": "0.1",
+    "note": "Стартовий набір — з реальних посилань, що вже є на сайті (src/config/links.js): 3 особисті Instagram + 4 підвальні посилання (ІДЕЇ-ТЗ §2.4 'Стартовий набір завдань'). Додати нове завдання — дописати об'єкт нижче, коду не чіпати.",
+    "total_tasks": 7
+  },
+  "tasks": [
+    {
+      "id": "task_oleg_01",
+      "title": "Познайомся з Головою ПРМТУ",
+      "steps": [
+        { "action": "Підпишись на Instagram Олега Григорюка", "url": "https://www.instagram.com/og3003", "button_label": "Відкрити" }
+      ],
+      "verify_hint": "Показати профіль із підпискою на og3003",
+      "active": true
+    },
+    {
+      "id": "task_iryna_01",
+      "title": "Підтримай Молодіжну раду особисто",
+      "steps": [
+        { "action": "Підпишись на Instagram Ірини Єріненко", "url": "https://www.instagram.com/yerinenko_iryna", "button_label": "Відкрити" }
+      ],
+      "verify_hint": "Показати профіль із підпискою на yerinenko_iryna",
+      "active": true
+    },
+    {
+      "id": "task_sobirov_01",
+      "title": "Познайомся з розробником гри",
+      "steps": [
+        { "action": "Підпишись на Instagram Сухроба Собірова", "url": "https://www.instagram.com/sobirovs_s", "button_label": "Відкрити" }
+      ],
+      "verify_hint": "Показати профіль із підпискою на sobirovs_s",
+      "active": true
+    },
+    {
+      "id": "task_youth_01",
+      "title": "Підтримай Молодіжну раду",
+      "steps": [
+        { "action": "Підпишись на Instagram Молодіжної ради ПРМТУ", "url": "https://www.instagram.com/mtwtuyouth", "button_label": "Відкрити" },
+        { "action": "Постав лайк під останнім дописом", "url": "https://www.instagram.com/mtwtuyouth", "button_label": "Відкрити" },
+        { "action": "Напиши коментар під закріпленим дописом", "url": "https://www.instagram.com/mtwtuyouth", "button_label": "Відкрити" }
+      ],
+      "verify_hint": "Показати профіль із підпискою і коментар під закріпленим дописом",
+      "active": true
+    },
+    {
+      "id": "task_lawhub_01",
+      "title": "Дізнайся про захист прав",
+      "steps": [
+        { "action": "Підпишись на MTWTU LAW HUB", "url": "https://www.instagram.com/mtwtu_law_hub/", "button_label": "Відкрити" },
+        { "action": "Постав лайк під останнім дописом", "url": "https://www.instagram.com/mtwtu_law_hub/", "button_label": "Відкрити" }
+      ],
+      "verify_hint": "Показати профіль із підпискою на mtwtu_law_hub",
+      "active": true
+    },
+    {
+      "id": "task_prmtu_01",
+      "title": "Стеж за новинами ПРМТУ",
+      "steps": [
+        { "action": "Підпишись на Instagram ПРМТУ", "url": "https://www.instagram.com/mtwtu_itf_ukraine", "button_label": "Відкрити" },
+        { "action": "Постав лайк під останнім дописом", "url": "https://www.instagram.com/mtwtu_itf_ukraine", "button_label": "Відкрити" }
+      ],
+      "verify_hint": "Показати профіль із підпискою на mtwtu_itf_ukraine",
+      "active": true
+    },
+    {
+      "id": "task_telegram_01",
+      "title": "Підключи Telegram-бот ПРМТУ",
+      "steps": [
+        { "action": "Відкрий чат-бот і натисни «Старт»", "url": "https://wep.wf/uvmj7n", "button_label": "Відкрити" }
+      ],
+      "verify_hint": "Показати відкритий чат із ботом ПРМТУ",
+      "active": true
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import BoardSection from "../components/board/BoardSection.astro";
+import "../styles/board.css";
+---
+
+<BaseLayout
+  title="Живе поле — Unionize"
+  description="Інтерактивне ігрове поле Unionize: торкніться клітинки ППО, щоб дізнатися вартість, внесок і зв'язок із профспілкою."
+>
+  <BoardSection />
+</BaseLayout>
+
+<script>
+  import "../scripts/board-client.ts";
+</script>
