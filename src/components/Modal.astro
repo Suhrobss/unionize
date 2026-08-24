@@ -36,9 +36,10 @@ const { id } = Astro.props;
   .modal {
     position: fixed;
     z-index: 61;
-    background: var(--ink-700);
+    background: var(--surf-2);
+    box-shadow: var(--shadow-modal), var(--edge-top-hi);
     overflow-y: auto;
-    transition: transform 320ms cubic-bezier(.16, 1, .28, 1);
+    transition: transform 320ms var(--ease-out);
   }
 
   /* мобільний: знизу */
@@ -47,7 +48,7 @@ const { id } = Astro.props;
     right: 0;
     bottom: 0;
     max-height: 88svh;
-    border-radius: var(--r-2) var(--r-2) 0 0;
+    border-radius: var(--r-3) var(--r-3) 0 0;
     padding: 20px;
     transform: translateY(100%);
   }
@@ -61,7 +62,7 @@ const { id } = Astro.props;
     width: 36px;
     height: 4px;
     background: var(--dim);
-    border-radius: var(--r-full);
+    border-radius: 999px;
     margin: 0 auto 16px;
   }
 

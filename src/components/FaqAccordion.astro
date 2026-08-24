@@ -78,7 +78,7 @@ const questions = faqData.questions as FaqQuestion[];
 
   @media (min-width: 861px) {
     .faq {
-      padding-block: var(--space-32);
+      padding-block: var(--space-24);
     }
   }
 
@@ -99,26 +99,72 @@ const questions = faqData.questions as FaqQuestion[];
   }
 
   .chip {
-    padding: 8px 14px;
-    border-radius: var(--r-1);
-    border: var(--hairline);
+    padding: 9px 16px;
+    border-radius: 999px;
+    border: 0;
+    background: var(--surf-1);
+    box-shadow: var(--elev-1), var(--edge-ring), var(--edge-top);
     font-family: var(--font-mono);
     font-weight: 500;
     font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--dim);
-    transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+    color: var(--steel);
+    transition:
+      background 200ms ease,
+      color 200ms ease,
+      box-shadow 200ms ease,
+      transform 200ms var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .chip:hover {
+      transform: translateY(-2px);
+      color: var(--champ);
+      box-shadow: var(--elev-2), var(--edge-ring-brass), var(--edge-top-hi);
+    }
   }
 
   .chip.is-active {
-    background: var(--champ);
-    border-color: var(--champ);
-    color: var(--ink-900);
+    background: linear-gradient(180deg, #D9BC7C 0%, #C2A059 46%, #A98741 100%);
+    color: #1A1204;
+    box-shadow:
+      var(--shadow-brass),
+      inset 0 1px 0 rgba(255, 246, 224, .55);
   }
 
+  .faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  /* Було: рядки, розділені волосками, — виглядало як неоформлений список.
+     Стало: кожне питання — окрема піднята картка. */
   .faq-row {
-    border-bottom: var(--hairline);
+    border-radius: var(--r-2);
+    background: var(--surf-1);
+    box-shadow: var(--elev-1), var(--edge-ring), var(--edge-top);
+    transition: box-shadow 280ms ease, background 280ms ease;
+  }
+
+  /* Фільтр ховає рядки через атрибут hidden. Правила вище не задають
+     display, але додаємо явно: варто помилково поставити .faq-row у flex
+     чи grid — і атрибут перестане діяти без жодної помилки в консолі. */
+  .faq-row[hidden] {
+    display: none;
+  }
+
+  .faq-row.is-open {
+    background: var(--surf-2);
+    box-shadow: var(--elev-2), var(--edge-ring-brass), var(--edge-top-hi);
+  }
+
+  @media (hover: hover) {
+    .faq-row:not(.is-open):hover {
+      background: var(--surf-2);
+      box-shadow: var(--elev-2), var(--edge-ring), var(--edge-top-hi);
+    }
   }
 
   .faq-row__trigger {
@@ -127,25 +173,10 @@ const questions = faqData.questions as FaqQuestion[];
     align-items: center;
     justify-content: space-between;
     gap: var(--space-4);
-    padding: 20px 0;
+    padding: 20px 22px;
+    border-radius: var(--r-2);
     position: relative;
     text-align: left;
-  }
-
-  .faq-row__trigger::before {
-    content: "";
-    position: absolute;
-    left: -16px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 0;
-    height: 2px;
-    background: var(--brass);
-    transition: width 200ms ease;
-  }
-
-  .faq-row__trigger:hover::before {
-    width: 16px;
   }
 
   .faq-row__question {
@@ -155,31 +186,58 @@ const questions = faqData.questions as FaqQuestion[];
     transition: color 200ms ease;
   }
 
-  .faq-row__trigger:hover .faq-row__question {
+  .faq-row__trigger:hover .faq-row__question,
+  .faq-row.is-open .faq-row__question {
     color: var(--champ);
   }
 
+  .faq-row__trigger:focus-visible {
+    outline: 2px solid var(--champ);
+    outline-offset: -2px;
+  }
+
+  /* Стрілка сидить у власному заглибленні — маленький орган керування,
+     а не значок, приклеєний до тексту. */
   .faq-row__arrow {
     flex-shrink: 0;
-    width: 8px;
-    height: 8px;
-    background: var(--dim);
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--r-full);
+    background: var(--surf-sunk);
+    box-shadow: var(--edge-ring);
+    transition: transform 280ms var(--ease-out), box-shadow 200ms ease;
+  }
+
+  .faq-row__arrow::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    background: var(--steel);
     clip-path: polygon(0 0, 100% 50%, 0 100%);
-    transition: transform 240ms ease, background 200ms ease;
+    transform: translateX(1px);
+    transition: background 200ms ease;
   }
 
   .faq-row__trigger:hover .faq-row__arrow {
+    box-shadow: var(--edge-ring-brass);
+  }
+
+  .faq-row__trigger:hover .faq-row__arrow::before,
+  .faq-row.is-open .faq-row__arrow::before {
     background: var(--champ);
   }
 
   .faq-row.is-open .faq-row__arrow {
     transform: rotate(90deg);
+    box-shadow: var(--edge-ring-brass);
   }
 
   .faq-row__panel {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 320ms cubic-bezier(.16, 1, .28, 1);
+    transition: grid-template-rows 320ms var(--ease-out);
   }
 
   .faq-row.is-open .faq-row__panel {
@@ -188,6 +246,14 @@ const questions = faqData.questions as FaqQuestion[];
 
   .faq-row__answer {
     overflow: hidden;
+    padding-inline: 22px;
+  }
+
+  /* Волосок-роздільник між питанням і відповіддю — з'являється тільки
+     у розкритому стані, інакше картка виглядає розрізаною завжди. */
+  .faq-row.is-open .faq-row__answer > :first-child {
+    border-top: var(--hairline);
+    padding-top: var(--space-4);
   }
 
   .faq-row__p,
@@ -218,6 +284,10 @@ const questions = faqData.questions as FaqQuestion[];
     padding-bottom: var(--space-2);
   }
 
+  .faq-row__list li::marker {
+    color: var(--brass);
+  }
+
   .faq-row__p :global(.num),
   .faq-row__subhead :global(.num),
   .faq-row__list :global(.num) {
@@ -239,20 +309,20 @@ const questions = faqData.questions as FaqQuestion[];
   }
 
   .faq__empty {
-    padding-block: var(--space-8);
+    margin-top: var(--space-4);
+    padding: var(--space-8) var(--space-6);
+    border-radius: var(--r-2);
+    background: var(--surf-sunk);
+    box-shadow: var(--edge-ring);
     color: var(--steel);
   }
 
+  .faq__empty[hidden] {
+    display: none;
+  }
+
   .btn-outline {
-    margin-top: var(--space-3);
-    padding: 10px 20px;
-    border-radius: var(--r-1);
-    border: 1px solid rgba(228, 210, 166, .4);
-    color: var(--champ);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    margin-top: var(--space-4);
   }
 </style>
 

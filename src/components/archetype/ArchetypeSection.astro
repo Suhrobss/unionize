@@ -133,9 +133,24 @@ import GravureScale from "../instrument/GravureScale.astro";
     display: none;
   }
 
-  /* --- інтро --- */
+  /* --- інтро ---
+     Секція тримає min-height, щоб екрани тесту не смикали сторінку при
+     перемиканні. Через це коротке запрошення висіло посеред порожнечі —
+     тому воно тепер у власній панелі з теплим світлом у куті. */
   .a-intro {
     max-width: 60ch;
+    padding: var(--space-8) var(--space-6) var(--space-12);
+    border-radius: var(--r-3);
+    background:
+      radial-gradient(85% 120% at 0% 0%, rgba(228, 210, 166, .10), transparent 62%),
+      var(--surf-1);
+    box-shadow: var(--elev-2), var(--edge-ring), var(--edge-top);
+  }
+
+  @media (min-width: 861px) {
+    .a-intro {
+      padding: var(--space-12);
+    }
   }
 
   .a-intro__eyebrow {
@@ -206,25 +221,37 @@ import GravureScale from "../instrument/GravureScale.astro";
   }
 
   .a-option {
-    background: var(--ink-700);
-    border: var(--hairline);
+    position: relative;
+    background: var(--surf-1);
+    border: 0;
+    box-shadow: var(--elev-1), var(--edge-ring), var(--edge-top);
     border-radius: var(--r-2);
     padding: 20px 22px;
     min-height: 72px;
     text-align: left;
     color: var(--bone);
-    transition: background 160ms ease, border-color 160ms ease;
+    transition:
+      background 200ms ease,
+      box-shadow 200ms ease,
+      transform 200ms var(--ease-out);
   }
 
-  .a-option:hover {
-    background: var(--ink-600);
-    border-color: rgba(228, 210, 166, .3);
+  @media (hover: hover) {
+    .a-option:hover {
+      transform: translateY(-2px);
+      background: var(--surf-2);
+      box-shadow: var(--elev-2), var(--edge-ring-brass), var(--edge-top-hi);
+    }
   }
 
+  /* Обраний варіант підсвічується рівно так само для обох відповідей —
+     вимога 2.1: жоден із варіантів не має виглядати привабливішим. */
   .a-option.is-selected {
-    border: 2px solid var(--champ);
-    background: var(--ink-600);
-    position: relative;
+    background: var(--surf-2);
+    box-shadow:
+      var(--elev-2),
+      inset 0 0 0 2px var(--champ),
+      var(--edge-top-hi);
     padding-left: 26px;
   }
 
@@ -235,7 +262,8 @@ import GravureScale from "../instrument/GravureScale.astro";
     top: 0;
     bottom: 0;
     width: 4px;
-    background: var(--brass);
+    border-radius: var(--r-2) 0 0 var(--r-2);
+    background: linear-gradient(180deg, var(--champ), var(--brass));
   }
 
   .a-question__next {
@@ -243,9 +271,8 @@ import GravureScale from "../instrument/GravureScale.astro";
   }
 
   .a-question__next:disabled {
-    background: transparent;
-    box-shadow: none;
-    border: 1px solid rgba(244, 244, 240, .14);
+    background: var(--surf-sunk);
+    box-shadow: var(--edge-ring);
     color: var(--dim);
     cursor: not-allowed;
   }

@@ -63,27 +63,35 @@ const PEOPLE = [
     padding-block: var(--space-16);
     display: flex;
     flex-direction: column;
-    gap: var(--space-16);
+    gap: var(--space-12);
   }
 
   @media (min-width: 861px) {
     .greetings {
-      padding-block: var(--space-32);
-      gap: var(--space-24);
+      padding-block: var(--space-24);
+      gap: var(--space-16);
     }
   }
 
+  /* Було: фото й текст лежали просто на тлі сторінки — три звернення
+     читалися як один нерозділений потік. Стало: кожне у власній панелі,
+     тому видно, де закінчується голос однієї людини й починається інший. */
   .greeting {
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
+    padding: var(--space-6);
+    border-radius: var(--r-3);
+    background: var(--surf-1);
+    box-shadow: var(--elev-2), var(--edge-ring), var(--edge-top);
   }
 
   @media (min-width: 861px) {
     .greeting {
       flex-direction: row;
-      align-items: flex-start;
+      align-items: center;
       gap: var(--space-12);
+      padding: var(--space-12);
     }
 
     .greeting--reverse {
@@ -91,28 +99,40 @@ const PEOPLE = [
     }
   }
 
+  /* Було: обрізаний прямокутник із волоском унизу — фотографія лежала
+     на сторінці як вставлений файл. Стало: знімок у рамці, піднятий над
+     тлом, із латунним контуром. Портрет стає предметом на столі. */
   .greeting__photo {
     flex: 0 0 auto;
     width: 100%;
     max-width: 320px;
     aspect-ratio: 1;
     overflow: hidden;
-    border-bottom: 1px solid var(--brass);
     position: relative;
+    border-radius: var(--r-2);
+    box-shadow:
+      var(--elev-3),
+      inset 0 0 0 1px rgba(228, 210, 166, .26);
   }
 
+  /* Затемнення до низу кадру + тепла верхня підсвітка: знімок сідає в
+     те саме освітлення, що й уся сторінка, замість жити окремо. */
   .greeting__photo::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, transparent 60%, rgba(6, 12, 18, .5));
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 80% at 50% 0%, rgba(228, 210, 166, .10), transparent 55%),
+      linear-gradient(180deg, transparent 52%, rgba(4, 9, 14, .72) 100%);
   }
 
   .greeting__photo img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: saturate(.85) contrast(1.05);
+    filter: saturate(.9) contrast(1.06);
   }
 
   .greeting__text {
@@ -136,5 +156,13 @@ const PEOPLE = [
     margin-top: var(--space-4);
     max-width: 56ch;
     color: var(--steel);
+  }
+
+  /* Останній абзац кожного звернення — підпис-заклик. Латунний волосок
+     зліва відділяє його від тіла тексту, не додаючи нової сутності. */
+  .greeting__paragraph:last-child {
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--brass);
+    color: var(--bone);
   }
 </style>

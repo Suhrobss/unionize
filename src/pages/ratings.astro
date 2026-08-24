@@ -96,8 +96,9 @@ import { SEASON_LABEL } from "../config/ratings.js";
       width: 100%;
       max-width: 340px;
       padding: 10px 14px;
-      background: var(--ink-900);
-      border: var(--hairline);
+      background: var(--surf-sunk);
+      border: 0;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, .5), var(--edge-ring);
       border-radius: var(--r-1);
       color: var(--bone);
       font-family: var(--font-text);
@@ -137,7 +138,7 @@ import { SEASON_LABEL } from "../config/ratings.js";
       border-radius: var(--r-2);
       margin-bottom: var(--space-2);
       background: var(--ink-700);
-      background-image: linear-gradient(90deg, var(--ink-700) 0%, var(--ink-600) 50%, var(--ink-700) 100%);
+      background-image: linear-gradient(90deg, var(--ink-700) 0%, var(--ink-500) 50%, var(--ink-700) 100%);
       background-size: 200% 100%;
       animation: skeleton-pulse 1.4s ease-in-out infinite;
     }
@@ -162,14 +163,23 @@ import { SEASON_LABEL } from "../config/ratings.js";
     }
 
     .ratings__panel :global(.podium__card) {
-      background: var(--ink-700);
+      background: var(--surf-1);
+      box-shadow: var(--elev-1), var(--edge-ring), var(--edge-top);
       border-radius: var(--r-2);
       padding: 24px 16px;
       text-align: center;
     }
 
+    /* Перше місце має бути найважчим предметом на екрані: тепліша
+       поверхня, латунний контур і найглибша тінь. */
     .ratings__panel :global(.podium__card--1) {
-      border: 1px solid var(--champ);
+      background:
+        linear-gradient(180deg, rgba(228, 210, 166, .10), transparent 55%),
+        var(--surf-2);
+      box-shadow:
+        var(--elev-3),
+        inset 0 0 0 1px rgba(228, 210, 166, .45),
+        var(--edge-top-hi);
     }
 
     .ratings__panel :global(.podium__place) {
@@ -221,8 +231,11 @@ import { SEASON_LABEL } from "../config/ratings.js";
       grid-template-columns: 32px 1fr auto;
       align-items: center;
       gap: var(--space-3);
-      padding: 14px 0;
-      border-bottom: var(--hairline);
+      padding: 14px 16px;
+      margin-bottom: var(--space-2);
+      border-radius: var(--r-1);
+      background: var(--surf-1);
+      box-shadow: var(--edge-ring), var(--edge-top);
     }
 
     .ratings__panel :global(.rlist__place) {
@@ -253,15 +266,7 @@ import { SEASON_LABEL } from "../config/ratings.js";
       width: 100%;
     }
 
-    .ratings__panel :global(.btn-outline) {
-      padding: 10px 20px;
-      border-radius: var(--r-1);
-      border: 1px solid rgba(228, 210, 166, .4);
-      color: var(--champ);
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
+    /* Оформлення .btn-outline живе у buttons.css — місцевий дубль давав
+       кнопку іншого зросту й ваги, ніж усі інші кнопки сайту. */
   </style>
 </BaseLayout>

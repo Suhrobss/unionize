@@ -13,37 +13,31 @@ import { JOIN_FORM_URL } from "../config/links.js";
     bottom: 20px;
     right: 20px;
     padding: 15px 26px;
-    background: linear-gradient(
-      180deg,
-      #f3e6c4 0%,
-      var(--champ) 22%,
-      var(--brass) 55%,
-      #8a6b2e 78%,
-      var(--brass-dk) 100%
-    );
+    background: linear-gradient(180deg, #D9BC7C 0%, #C2A059 46%, #A98741 100%);
     box-shadow:
       var(--shadow-brass),
-      inset 0 1px 0 rgba(255, 255, 255, .65),
-      inset 0 -2px 4px rgba(0, 0, 0, .4);
-    color: var(--ink-900);
-    border-radius: var(--r-1);
+      inset 0 1px 0 rgba(255, 246, 224, .55),
+      inset 0 -1px 0 rgba(74, 55, 17, .55);
+    color: #1A1204;
+    border-radius: 999px;
     font-family: var(--font-mono);
     font-weight: 500;
     font-size: 12px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    transition: transform 240ms ease-out, letter-spacing 240ms ease-out, box-shadow 240ms ease-out,
+    transition: transform 240ms var(--ease-out), background 240ms ease-out, box-shadow 240ms ease-out,
       opacity 400ms ease;
   }
 
   .floating-cta:hover {
-    letter-spacing: 0.24em;
     transform: translateY(-2px);
+    background: linear-gradient(180deg, #E6CB90 0%, #CDAC64 46%, #B4914A 100%);
     box-shadow:
-      var(--shadow-brass),
-      0 0 40px rgba(228, 210, 166, .3),
-      inset 0 1px 0 rgba(255, 255, 255, .65),
-      inset 0 -2px 4px rgba(0, 0, 0, .4);
+      0 0 36px -8px rgba(228, 210, 166, .45),
+      0 2px 4px rgba(0, 0, 0, .6),
+      0 18px 34px -12px rgba(0, 0, 0, .85),
+      inset 0 1px 0 rgba(255, 246, 224, .65),
+      inset 0 -1px 0 rgba(74, 55, 17, .55);
   }
 
   .floating-cta:focus-visible {

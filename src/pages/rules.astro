@@ -26,7 +26,6 @@ import RulesCalculator from "../components/RulesCalculator.astro";
 <style>
   .rules-cta {
     padding-block: var(--space-16);
-    border-top: var(--hairline);
   }
 
   .rules-cta__inner {
@@ -34,7 +33,13 @@ import RulesCalculator from "../components/RulesCalculator.astro";
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-4);
+    gap: var(--space-6);
+    padding: var(--space-8);
+    border-radius: var(--r-3);
+    background:
+      radial-gradient(90% 140% at 0% 0%, rgba(228, 210, 166, .08), transparent 60%),
+      var(--surf-1);
+    box-shadow: var(--elev-2), var(--edge-ring-brass), var(--edge-top);
   }
 
   .rules-cta__label {
@@ -47,15 +52,4 @@ import RulesCalculator from "../components/RulesCalculator.astro";
     max-width: 48ch;
   }
 
-  .btn-outline {
-    flex-shrink: 0;
-    padding: 12px 22px;
-    border-radius: var(--r-1);
-    border: 1px solid rgba(228, 210, 166, .4);
-    color: var(--champ);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
 </style>

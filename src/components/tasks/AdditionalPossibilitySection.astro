@@ -188,17 +188,24 @@ import PaperLedger from "../instrument/PaperLedger.astro";
   }
 
   .ap-branch-card {
-    background: var(--ink-700);
-    border: var(--hairline);
+    background: var(--surf-1);
+    border: 0;
+    box-shadow: var(--elev-1), var(--edge-ring), var(--edge-top);
     border-radius: var(--r-2);
     padding: 32px 28px;
     text-align: left;
-    transition: background 160ms ease, border-color 160ms ease;
+    transition:
+      background 200ms ease,
+      box-shadow 200ms ease,
+      transform 200ms var(--ease-out);
   }
 
-  .ap-branch-card:hover {
-    background: var(--ink-600);
-    border-color: rgba(228, 210, 166, .3);
+  @media (hover: hover) {
+    .ap-branch-card:hover {
+      transform: translateY(-4px);
+      background: var(--surf-2);
+      box-shadow: var(--elev-3), var(--edge-ring-brass), var(--edge-top-hi);
+    }
   }
 
   .ap-branch-card.is-disabled {
@@ -242,8 +249,9 @@ import PaperLedger from "../instrument/PaperLedger.astro";
 
   .ap-task__steps {
     margin-top: var(--space-6);
-    background: var(--ink-700);
-    border: var(--hairline);
+    background: var(--surf-1);
+    border: 0;
+    box-shadow: var(--elev-1), var(--edge-ring), var(--edge-top);
     border-radius: var(--r-2);
     padding: 8px 28px;
   }
@@ -315,18 +323,26 @@ import PaperLedger from "../instrument/PaperLedger.astro";
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    background: var(--ink-700);
-    border: var(--hairline);
+    background: var(--surf-1);
+    border: 0;
+    box-shadow: var(--elev-1), var(--edge-ring), var(--edge-top);
     border-radius: var(--r-2);
     padding: 16px 18px;
     min-height: 56px;
     text-align: left;
     color: var(--bone);
-    transition: background 140ms ease, border-color 140ms ease;
+    transition:
+      background 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms var(--ease-out);
   }
 
-  .ap-quiz-option:hover:not(:disabled) {
-    background: var(--ink-600);
+  @media (hover: hover) {
+    .ap-quiz-option:hover:not(:disabled) {
+      transform: translateY(-2px);
+      background: var(--surf-2);
+      box-shadow: var(--elev-2), var(--edge-ring-brass), var(--edge-top-hi);
+    }
   }
 
   .ap-quiz-option__letter {
@@ -337,15 +353,17 @@ import PaperLedger from "../instrument/PaperLedger.astro";
     align-items: center;
     justify-content: center;
     border-radius: var(--r-1);
-    border: var(--hairline);
+    border: 0;
+    background: var(--surf-sunk);
+    box-shadow: var(--edge-ring);
     font-family: var(--font-mono);
     font-weight: 700;
-    color: var(--dim);
+    color: var(--steel);
   }
 
   .ap-quiz-option.is-correct {
-    border: 2px solid var(--pos);
-    background: rgba(63, 191, 127, .1);
+    background: linear-gradient(180deg, rgba(63, 191, 127, .16), rgba(63, 191, 127, .06));
+    box-shadow: var(--elev-2), inset 0 0 0 2px var(--pos), var(--edge-top-hi);
   }
 
   .ap-quiz-option.is-correct .ap-quiz-option__letter {

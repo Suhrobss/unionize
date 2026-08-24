@@ -113,7 +113,7 @@ const CATEGORIES = [
 
   @media (min-width: 861px) {
     .gallery {
-      padding-block: var(--space-32);
+      padding-block: var(--space-24);
     }
   }
 
@@ -123,7 +123,7 @@ const CATEGORIES = [
     font-size: clamp(2rem, 6vw, 4rem);
     line-height: 0.96;
     letter-spacing: -0.04em;
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
   }
 
   .gallery__grid {
@@ -135,6 +135,17 @@ const CATEGORIES = [
   @media (min-width: 561px) {
     .gallery__grid {
       grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* На десктопі три колонки по 1200px давали картку 380×570 — назва
+     губилася посеред порожнього поля. Чотири колонки в обмеженій сітці
+     дають пропорцію, близьку до справжньої картки з колоди. */
+  @media (min-width: 861px) {
+    .gallery__grid {
+      grid-template-columns: repeat(4, 1fr);
+      max-width: 940px;
+      gap: var(--space-6);
     }
   }
 
@@ -162,6 +173,14 @@ const CATEGORIES = [
     .flip-card:hover .flip-card__inner {
       transform: rotateY(180deg);
     }
+
+    .flip-card {
+      transition: translate 320ms var(--ease-out);
+    }
+
+    .flip-card:hover {
+      translate: 0 -6px;
+    }
   }
 
   .flip-card.is-flipped .flip-card__inner {
@@ -176,14 +195,28 @@ const CATEGORIES = [
     padding: var(--space-4);
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    /* Обидві сторони — підняті картки, а не заливки. Тінь із контуром
+       робить із них колоду, що лежить на столі. */
+    box-shadow: var(--elev-2), var(--edge-ring), var(--edge-top);
   }
 
   .flip-card__face--front {
-    background: var(--ink-700);
+    background: var(--surf-1);
     align-items: center;
     justify-content: center;
     text-align: center;
     gap: var(--space-2);
+  }
+
+  /* Колір типу піднімається знизу лицьової сторони серпанком — картка
+     забарвлена своїм кодом ще до перевертання, без пласкої плашки. */
+  .flip-card__face--front::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(110% 60% at 50% 118%, color-mix(in srgb, var(--cat-color) 34%, transparent), transparent 70%);
   }
 
   .flip-card__stripe {
@@ -191,25 +224,32 @@ const CATEGORIES = [
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
-    background: var(--cat-color);
-    border-radius: var(--r-2) var(--r-2) 0 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--cat-color) 22%, var(--cat-color) 78%, transparent);
   }
 
   .flip-card__title {
+    position: relative;
     font-family: var(--font-display);
     font-weight: 700;
     color: var(--bone);
   }
 
   .flip-card__count {
-    color: var(--dim);
+    position: relative;
+    color: var(--steel);
   }
 
   .flip-card__face--back {
-    background: color-mix(in srgb, var(--cat-color) 32%, var(--ink-900));
+    background:
+      linear-gradient(180deg, rgba(244, 244, 240, .06), transparent 45%),
+      color-mix(in srgb, var(--cat-color) 26%, var(--ink-900));
     transform: rotateY(180deg);
     justify-content: center;
+    box-shadow:
+      var(--elev-2),
+      inset 0 0 0 1px color-mix(in srgb, var(--cat-color) 45%, transparent),
+      var(--edge-top-hi);
   }
 
   .flip-card__description {

@@ -10,6 +10,40 @@
 html {
   color-scheme: dark;
   scroll-behavior: smooth;
+  /* Тло живе на html, а не на body: body має overflow-x: clip, і фіксовані
+     шари атмосфери всередині нього поводяться по-різному в різних браузерах. */
+  background: var(--ink-800);
+}
+
+/* АТМОСФЕРА — шар 1: світло.
+   Три нерухомі теплі й одна холодна пляма. Без анімації: рухоме світло
+   на фоні — головна ознака згенерованого сайту. Нерухоме працює як
+   освітлення приміщення, у якому стоїть предмет. z-index -1 кладе шар
+   над заливкою полотна, але під увесь контент. */
+html::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(70vw 52vh at 12% -8%, rgba(185, 146, 74, .16), transparent 62%),
+    radial-gradient(58vw 44vh at 88% 12%, rgba(34, 184, 198, .07), transparent 60%),
+    radial-gradient(84vw 60vh at 50% 104%, rgba(185, 146, 74, .10), transparent 62%);
+}
+
+/* АТМОСФЕРА — шар 2: зерно.
+   Дуже слабке. Рівний градієнт на великій площі дає смугастість і
+   виглядає як дешевий банер; зерно її ламає й додає матеріальності. */
+html::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* якір не має ховатись під липкою шапкою */
@@ -29,7 +63,7 @@ body {
   /* clip, а не hidden: hidden робить body контейнером прокрутки й ламає
      position: sticky у нащадків (закріплена сцена першого екрана) */
   overflow-x: clip;
-  background: var(--ink-800);
+  background: transparent;
   color: var(--bone);
   font-family: var(--font-text);
   font-size: 1.0625rem;

@@ -19,24 +19,19 @@
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--ink-900);
-  background: linear-gradient(
-    180deg,
-    var(--champ-hi) 0%,
-    var(--champ) 24%,
-    var(--brass) 56%,
-    #8a6b2e 80%,
-    var(--brass-lo) 100%
-  );
+  color: #1A1204;
+  /* Матова бронза, не поліроване золото. П'ятиступеневий металевий
+     градієнт із хайлайтом посередині читається як кнопка з 2010-х;
+     тут — рівний теплий метал і одна світлова фаска згори. */
+  background: linear-gradient(180deg, #D9BC7C 0%, #C2A059 46%, #A98741 100%);
   box-shadow:
-    0 10px 22px -6px rgba(0, 0, 0, .85),
-    inset 0 1px 0 rgba(255, 255, 255, .7),
-    inset 0 -2px 4px rgba(0, 0, 0, .42);
+    var(--shadow-brass),
+    inset 0 1px 0 rgba(255, 246, 224, .55),
+    inset 0 -1px 0 rgba(74, 55, 17, .55);
   cursor: pointer;
   transition:
-    transform 240ms ease-out,
-    letter-spacing 240ms ease-out,
-    filter 240ms ease-out,
+    transform 240ms var(--ease-out),
+    background 240ms ease-out,
     box-shadow 240ms ease-out;
 }
 
@@ -48,18 +43,21 @@
 
 .btn-brass:hover {
   transform: translateY(-2px);
-  letter-spacing: 0.24em;
-  filter: brightness(1.05);
+  background: linear-gradient(180deg, #E6CB90 0%, #CDAC64 46%, #B4914A 100%);
   box-shadow:
-    0 0 44px var(--halo),
-    0 10px 22px -6px rgba(0, 0, 0, .85),
-    inset 0 1px 0 rgba(255, 255, 255, .7),
-    inset 0 -2px 4px rgba(0, 0, 0, .42);
+    0 0 36px -8px rgba(228, 210, 166, .45),
+    0 2px 4px rgba(0, 0, 0, .6),
+    0 18px 34px -12px rgba(0, 0, 0, .85),
+    inset 0 1px 0 rgba(255, 246, 224, .65),
+    inset 0 -1px 0 rgba(74, 55, 17, .55);
 }
 
 .btn-brass:active {
-  transform: translateY(0) scale(.99);
-  box-shadow: inset 0 3px 8px rgba(0, 0, 0, .5);
+  transform: translateY(0);
+  background: linear-gradient(180deg, #B4914A 0%, #C2A059 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(48, 34, 8, .55),
+    inset 0 -1px 0 rgba(255, 246, 224, .25);
 }
 
 .btn-brass:focus-visible {
@@ -69,14 +67,11 @@
 
 .btn-brass:disabled,
 .btn-brass[aria-disabled="true"] {
-  background: transparent;
-  border: 1px solid rgba(244, 244, 240, .14);
-  box-shadow: none;
+  background: var(--surf-sunk);
+  box-shadow: var(--edge-ring);
   color: var(--dim);
   cursor: not-allowed;
   transform: none;
-  letter-spacing: 0.18em;
-  filter: none;
 }
 
 /* Проблиск — світлова смуга під кутом 105°, один прохід за наведення.
@@ -126,9 +121,15 @@
   height: 52px;
   padding: 0 28px;
   border-radius: var(--r-1);
-  border: 1px solid rgba(228, 210, 166, .42);
+  border: 0;
   color: var(--champ);
-  background: transparent;
+  /* Гола рамка на темному тлі виглядає як заготовка. Під контуром —
+     ледь помітна поверхня, тому кнопка має тіло, а не тільки край. */
+  background: var(--surf-1);
+  box-shadow:
+    var(--elev-1),
+    inset 0 0 0 1px rgba(228, 210, 166, .30),
+    var(--edge-top);
   font-family: var(--font-mono);
   font-weight: 500;
   font-size: 12px;
@@ -136,9 +137,9 @@
   text-transform: uppercase;
   cursor: pointer;
   transition:
-    transform 240ms ease-out,
+    transform 240ms var(--ease-out),
     background 240ms ease-out,
-    border-color 240ms ease-out;
+    box-shadow 240ms ease-out;
 }
 
 @media (max-width: 860px) {
@@ -148,13 +149,19 @@
 }
 
 .btn-outline:hover {
-  background: rgba(228, 210, 166, .10);
-  border-color: var(--champ);
+  background: var(--surf-2);
   transform: translateY(-2px);
+  box-shadow:
+    var(--elev-2),
+    inset 0 0 0 1px rgba(228, 210, 166, .55),
+    var(--edge-top-hi);
 }
 
 .btn-outline:active {
-  transform: translateY(0) scale(.99);
+  transform: translateY(0);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, .5),
+    inset 0 0 0 1px rgba(228, 210, 166, .40);
 }
 
 .btn-outline:focus-visible {
@@ -164,11 +171,11 @@
 
 .btn-outline:disabled,
 .btn-outline[aria-disabled="true"] {
-  border-color: rgba(244, 244, 240, .14);
   color: var(--dim);
   cursor: not-allowed;
   transform: none;
-  background: transparent;
+  background: var(--surf-sunk);
+  box-shadow: var(--edge-ring);
 }
 
 .btn-outline[hidden] {
