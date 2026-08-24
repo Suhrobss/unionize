@@ -1,26 +1,30 @@
-// Кубики: текстури граней на canvas, спрощена власна балістика,
+// Кубики: заокруглений корпус, крапки-геометрія, спрощена власна балістика,
 // гарантоване досідання в оголошену грань (завдання «3D-вступ» §3).
 import {
-  BoxGeometry,
   CanvasTexture,
-  EdgesGeometry,
-  LineBasicMaterial,
-  LineSegments,
   Mesh,
+  MeshBasicMaterial,
+  MeshPhysicalMaterial,
   MeshStandardMaterial,
+  PlaneGeometry,
   Quaternion,
-  SRGBColorSpace,
+  SphereGeometry,
   Vector3,
 } from "three";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { BOARD_TOP_Y } from "./scene.js";
 import { easeOutCubic, clamp01 } from "./easing.js";
 
 const SIZE = 0.58;
-export const REST_Y = BOARD_TOP_Y + SIZE / 2;
+const HALF = SIZE / 2;
+const CORNER = 0.085;   // фаска — приблизно як у справжнього гральног кубика
+const PIP_R = 0.046;
+const PIP_STEP = 0.145; // крок сітки крапок від центра грані
 
-// Порядок граней у матеріалі: [+x, -x, +y, -y, +z, -z] = [3, 4, 1, 6, 2, 5].
+export const REST_Y = BOARD_TOP_Y + HALF;
+
 // Протилежні пари: 3+4, 1+6, 2+5 — усі дають 7, як на справжніх кубиках.
-const FACE_ORDER = [3, 4, 1, 6, 2, 5];
 const FACE_NORMALS = {
   3: new Vector3(1, 0, 0),
   4: new Vector3(-1, 0, 0),
@@ -30,34 +34,70 @@ const FACE_NORMALS = {
   5: new Vector3(0, 0, -1),
 };
 
-const PIPS = {
-  1: [[0.5, 0.5]],
-  2: [[0.28, 0.28], [0.72, 0.72]],
-  3: [[0.25, 0.25], [0.5, 0.5], [0.75, 0.75]],
-  4: [[0.28, 0.28], [0.72, 0.28], [0.28, 0.72], [0.72, 0.72]],
-  5: [[0.25, 0.25], [0.75, 0.25], [0.5, 0.5], [0.25, 0.75], [0.75, 0.75]],
-  6: [[0.28, 0.22], [0.72, 0.22], [0.28, 0.5], [0.72, 0.5], [0.28, 0.78], [0.72, 0.78]],
+// Для кожної грані — нормаль і дві осі в її площині. Задає, куди лягає
+// сітка крапок; напрямки підібрані так, щоб сусідні грані не дзеркалились.
+const FACE_BASIS = {
+  1: { u: [1, 0, 0], v: [0, 0, 1] },
+  6: { u: [1, 0, 0], v: [0, 0, -1] },
+  3: { u: [0, 0, -1], v: [0, 1, 0] },
+  4: { u: [0, 0, 1], v: [0, 1, 0] },
+  2: { u: [1, 0, 0], v: [0, 1, 0] },
+  5: { u: [-1, 0, 0], v: [0, 1, 0] },
 };
 
-function faceTexture(value) {
-  const c = document.createElement("canvas");
-  c.width = 256;
-  c.height = 256;
-  const ctx = c.getContext("2d");
-  ctx.fillStyle = "#EFE8D6";
-  ctx.fillRect(0, 0, 256, 256);
-  ctx.strokeStyle = "rgba(70,55,20,.35)";
-  ctx.lineWidth = 8;
-  ctx.strokeRect(6, 6, 244, 244);
-  ctx.fillStyle = "#141A22";
-  for (const [px, py] of PIPS[value]) {
-    ctx.beginPath();
-    ctx.arc(px * 256, py * 256, 26, 0, Math.PI * 2);
-    ctx.fill();
+// Сітка крапок у кроках PIP_STEP від центра грані.
+const PIP_GRID = {
+  1: [[0, 0]],
+  2: [[-1, -1], [1, 1]],
+  3: [[-1, -1], [0, 0], [1, 1]],
+  4: [[-1, -1], [1, -1], [-1, 1], [1, 1]],
+  5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]],
+  6: [[-1, -1], [-1, 0], [-1, 1], [1, -1], [1, 0], [1, 1]],
+};
+
+// Крапки — не намальовані кружечки на текстурі, а окремі тіла, втоплені
+// в грань так, що назовні лишається пласка шапочка. Саме вона ловить
+// світло й дає кубику вигляд предмета, а не куба з наклейкою.
+function pipGeometries() {
+  const dark = [];
+  const brass = [];
+  const proto = new SphereGeometry(PIP_R, 14, 10);
+
+  for (const value of [1, 2, 3, 4, 5, 6]) {
+    const n = FACE_NORMALS[value];
+    const { u, v } = FACE_BASIS[value];
+    for (const [gu, gv] of PIP_GRID[value]) {
+      const g = proto.clone();
+      // 0.62 радіуса всередині корпусу: назовні виходить неглибока шапочка
+      g.translate(
+        n.x * (HALF - PIP_R * 0.62) + u[0] * gu * PIP_STEP + v[0] * gv * PIP_STEP,
+        n.y * (HALF - PIP_R * 0.62) + u[1] * gu * PIP_STEP + v[1] * gv * PIP_STEP,
+        n.z * (HALF - PIP_R * 0.62) + u[2] * gu * PIP_STEP + v[2] * gv * PIP_STEP
+      );
+      // Одиниця — латунна. Той самий прийом, що й червона одиниця на
+      // класичних кубиках: одна грань відрізняється, і кидок читається.
+      (value === 1 ? brass : dark).push(g);
+    }
   }
-  const tex = new CanvasTexture(c);
-  tex.colorSpace = SRGBColorSpace;
-  return tex;
+  proto.dispose();
+  return { dark: mergeGeometries(dark), brass: mergeGeometries(brass) };
+}
+
+// Контактна тінь — м'яка пляма під кубиком.
+// Карта тіней увімкнена лише на десктопі, тож на телефоні кубики без неї
+// висіли б над полем. Пляма коштує один прозорий чотирикутник і працює
+// скрізь однаково, а на десктопі ще й підсилює дотик до поверхні.
+function contactShadowTexture() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const ctx = c.getContext("2d");
+  const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  g.addColorStop(0, "rgba(0,0,0,.62)");
+  g.addColorStop(0.45, "rgba(0,0,0,.28)");
+  g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  return new CanvasTexture(c);
 }
 
 const UP = new Vector3(0, 1, 0);
@@ -72,22 +112,48 @@ function targetQuaternion(value, yaw) {
 
 export function createDice(scene, fx, castShadow) {
   const homes = [new Vector3(-0.85, REST_Y, 0.5), new Vector3(0.55, REST_Y, 1.0)];
+  // Геометрії спільні для обох кубиків — рахуються один раз.
+  const bodyGeo = new RoundedBoxGeometry(SIZE, SIZE, SIZE, 4, CORNER);
+  const pips = pipGeometries();
+  // Кістяна смола з тонким лаком: clearcoat дає вузький відблиск поверх
+  // матової основи. Без нього кубик виглядає пластиковою заготовкою.
+  const bodyMat = new MeshPhysicalMaterial({
+    color: 0xF2EAD6,
+    roughness: 0.42,
+    metalness: 0,
+    clearcoat: 0.55,
+    clearcoatRoughness: 0.3,
+  });
+  const pipMat = new MeshStandardMaterial({ color: 0x141A22, roughness: 0.34, metalness: 0.05 });
+  const pipBrassMat = new MeshStandardMaterial({ color: 0xB9924A, roughness: 0.3, metalness: 0.65 });
+
+  const shadowGeo = new PlaneGeometry(1, 1);
+  const shadowTex = contactShadowTexture();
+
   const dice = homes.map((home, i) => {
-    const mats = FACE_ORDER.map(
-      (v) => new MeshStandardMaterial({ map: faceTexture(v), roughness: 0.55 })
-    );
-    const mesh = new Mesh(new BoxGeometry(SIZE, SIZE, SIZE), mats);
+    const mesh = new Mesh(bodyGeo, bodyMat);
     mesh.castShadow = castShadow;
     mesh.receiveShadow = castShadow;
-    const edges = new LineSegments(
-      new EdgesGeometry(mesh.geometry),
-      new LineBasicMaterial({ color: 0xb9924a, transparent: true, opacity: 0.55 })
-    );
-    mesh.add(edges);
+    mesh.add(new Mesh(pips.dark, pipMat));
+    mesh.add(new Mesh(pips.brass, pipBrassMat));
     mesh.visible = false;
     scene.add(mesh);
+
+    // Пляма лежить окремо від кубика: вона не обертається разом із ним,
+    // а тільки їздить за його положенням по полю.
+    const shadow = new Mesh(
+      shadowGeo,
+      new MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: 0 })
+    );
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = BOARD_TOP_Y + 0.004;
+    shadow.renderOrder = -1;
+    shadow.visible = false;
+    scene.add(shadow);
+
     return {
       mesh,
+      shadow,
       home,
       startY: i === 0 ? 3.6 : 4.1,
       vel: new Vector3(),
@@ -109,6 +175,7 @@ export function createDice(scene, fx, castShadow) {
   function roll(results, onSettled) {
     dice.forEach((d, i) => {
       d.mesh.visible = true;
+      d.shadow.visible = true;
       d.state = "flying";
       d.bounces = 0;
       d.firstImpactDone = false;
@@ -130,6 +197,7 @@ export function createDice(scene, fx, castShadow) {
   function setToResult(results) {
     dice.forEach((d, i) => {
       d.mesh.visible = true;
+      d.shadow.visible = true;
       d.state = "rest";
       d.result = results[i];
       d.mesh.position.copy(d.home);
@@ -143,8 +211,22 @@ export function createDice(scene, fx, castShadow) {
   const tmpQ = new Quaternion();
   const tmpAxis = new Vector3();
 
+  // Що вище кубик — то більша й блідіша пляма. Це єдиний натяк на висоту,
+  // який лишається, коли кубик у польоті.
+  function updateShadow(d) {
+    if (!d.shadow.visible) return;
+    const h = Math.max(0, d.mesh.position.y - REST_Y);
+    const k = clamp01(h / 2.6);
+    const s = SIZE * (1.15 + k * 1.5);
+    d.shadow.scale.set(s, s, 1);
+    d.shadow.position.x = d.mesh.position.x;
+    d.shadow.position.z = d.mesh.position.z;
+    d.shadow.material.opacity = 0.85 * (1 - k * 0.78);
+  }
+
   function update(dt, now) {
     for (const d of dice) {
+      updateShadow(d);
       if (d.state === "flying") {
         d.vel.y -= 13.5 * dt;
         d.mesh.position.addScaledVector(d.vel, dt);

@@ -19,6 +19,7 @@ import {
   LineSegments,
   Mesh,
   MeshBasicMaterial,
+  MeshPhysicalMaterial,
   MeshStandardMaterial,
   PCFShadowMap,
   PerspectiveCamera,
@@ -27,6 +28,7 @@ import {
   Points,
   PointsMaterial,
   RingGeometry,
+  SpotLight,
   Scene,
   SRGBColorSpace,
   TextureLoader,
@@ -36,7 +38,7 @@ import {
 import { easeOutCubic, clamp01 } from "./easing.js";
 import { u } from "../config/paths.js";
 
-export const BOARD_TOP_Y = 0.09; // BoxGeometry(10,.18,10) із центром в origin
+export const BOARD_TOP_Y = 0.17; // BoxGeometry(10,.34,10) із центром в origin
 
 const CHAMP = 0xe4d2a6;
 const LYMAN = 0x22b8c6;
@@ -96,20 +98,36 @@ export function createScene(canvas, profile) {
     new MeshStandardMaterial({ color: 0x04090e, roughness: 0.95 })
   );
   floor.rotation.x = -Math.PI / 2;
-  floor.position.y = -0.09;
+  floor.position.y = -0.175;
   floor.receiveShadow = !profile.mobile;
   scene.add(floor);
 
   // Поле
+  // Торець теплий і матовий — це зріз картону, а не продовження фону.
+  // Разом із потовщенням (0.18 → 0.34) він і дає полю вигляд предмета,
+  // що лежить на столі, а не картинки, вкладеної в підлогу.
+  const edgeMat = () => new MeshStandardMaterial({ color: 0x231C13, roughness: 0.92 });
   const boardMats = [
-    new MeshStandardMaterial({ color: 0x0c161f, roughness: 0.85 }), // +x
-    new MeshStandardMaterial({ color: 0x0c161f, roughness: 0.85 }), // -x
-    new MeshStandardMaterial({ color: 0x0c161f, roughness: 0.72 }), // +y (верх, отримає текстуру)
+    edgeMat(), // +x
+    edgeMat(), // -x
+    // Верх — лакована поверхня. Справжнє поле заламіноване, і саме вузький
+    // відблиск лампи, що повзе по ньому, відрізняє предмет від картинки.
+    // clearcoat дає цей відблиск поверх матової фарби, не освітлюючи друк.
+    new MeshPhysicalMaterial({
+      color: 0x0c161f,
+      roughness: 0.62,
+      metalness: 0,
+      // Лак рахується на кожен піксель, а поле займає майже весь екран.
+      // На телефоні беремо половину сили: відблиск лишається помітним,
+      // а зайвого навантаження на фрагментний шейдер немає.
+      clearcoat: profile.mobile ? 0.22 : 0.42,
+      clearcoatRoughness: 0.24,
+    }), // +y (верх, отримає текстуру)
     new MeshStandardMaterial({ color: 0x04090e, roughness: 0.95 }), // -y
-    new MeshStandardMaterial({ color: 0x0c161f, roughness: 0.85 }), // +z
-    new MeshStandardMaterial({ color: 0x0c161f, roughness: 0.85 }), // -z
+    edgeMat(), // +z
+    edgeMat(), // -z
   ];
-  const board = new Mesh(new BoxGeometry(10, 0.18, 10), boardMats);
+  const board = new Mesh(new BoxGeometry(10, 0.34, 10), boardMats);
   board.receiveShadow = !profile.mobile;
   board.castShadow = !profile.mobile;
   scene.add(board);
@@ -129,6 +147,11 @@ export function createScene(canvas, profile) {
         tex.colorSpace = SRGBColorSpace;
         tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
         boardMats[2].map = tex;
+        // Той самий файл як карта нерівностей: друк на картоні отримує
+        // мікрорельєф і перестає бути ідеально гладкою наклейкою.
+        // Окремої текстури не вантажимо — це та сама картинка з кешу.
+        boardMats[2].bumpMap = tex;
+        boardMats[2].bumpScale = 0.28;
         boardMats[2].color.set(0xffffff);
         boardMats[2].needsUpdate = true;
         resolve(true);
@@ -140,7 +163,7 @@ export function createScene(canvas, profile) {
 
   // Штурманська роза
   const rose = new Group();
-  rose.position.y = -0.085;
+  rose.position.y = -0.168;
   rose.add(
     makeCircle(6.9, 128, new LineBasicMaterial({ color: CHAMP, transparent: true, opacity: 0.22 }))
   );
@@ -192,12 +215,20 @@ export function createScene(canvas, profile) {
   scene.add(dust);
 
   // Світло
-  scene.add(new AmbientLight(0x24384a, 0.9));
-  const key = new DirectionalLight(0xf2e4c0, 1.15);
+  // Рівномірне освітлення — головна причина, чому поле читалося пласким:
+  // без перепаду яскравості поверхня не має об'єму. Заповнення прибрано
+  // майже вдвічі, а над столом підвішено світильник із м'яким краєм —
+  // центр яскравіший за кути, як над справжнім столом.
+  scene.add(new AmbientLight(0x24384a, 0.5));
+  const key = new DirectionalLight(0xf2e4c0, 1.6);
   key.position.set(4, 8, 3);
   if (!profile.mobile) {
     key.castShadow = true;
-    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.mapSize.set(2048, 2048);
+    // Без зсуву поле само себе штрихує: карта 10×10 одиниць на 2048px дає
+    // помітний муар на друці.
+    key.shadow.bias = -0.0004;
+    key.shadow.normalBias = 0.03;
     key.shadow.camera.left = -8;
     key.shadow.camera.right = 8;
     key.shadow.camera.top = 8;
@@ -210,6 +241,14 @@ export function createScene(canvas, profile) {
   const pulse = new PointLight(0xe4d2a6, 0.4, 10);
   pulse.position.set(0, 2.2, 0);
   scene.add(pulse);
+
+  // Світильник над столом. penumbra 0.8 дає розмиту межу плями —
+  // різкий круг світла виглядав би як прожектор на сцені.
+  const lamp = new SpotLight(0xf6e8c6, 26, 22, Math.PI / 5, 0.8, 1.4);
+  lamp.position.set(0.6, 7.4, 1.4);
+  lamp.target.position.set(0, 0, 0);
+  scene.add(lamp);
+  scene.add(lamp.target);
 
   // Ударні хвилі — пул кілець, які розширюються й гаснуть
   const waves = [];

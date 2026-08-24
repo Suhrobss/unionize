@@ -3,10 +3,8 @@
 import {
   BoxGeometry,
   CanvasTexture,
-  EdgesGeometry,
-  LineBasicMaterial,
-  LineSegments,
   Mesh,
+  MeshPhysicalMaterial,
   MeshStandardMaterial,
   SRGBColorSpace,
   TextureLoader,
@@ -65,11 +63,24 @@ function drawBack() {
 }
 
 export function createCard(scene, fx, castShadow) {
-  const side = new MeshStandardMaterial({ color: 0x0c161f, roughness: 0.7 });
-  const faceMat = new MeshStandardMaterial({ roughness: 0.6 });
+  // Торець — зріз картону, тому теплий і матовий, як у поля.
+  const side = new MeshStandardMaterial({ color: 0x231C13, roughness: 0.9 });
+  // Лице й рубашка лаковані — картка з колоди, а не аркуш паперу.
+  const faceMat = new MeshPhysicalMaterial({
+    roughness: 0.55,
+    metalness: 0,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.22,
+  });
   const backTex = drawBack();
   backTex.colorSpace = SRGBColorSpace;
-  const backMat = new MeshStandardMaterial({ map: backTex, roughness: 0.7 });
+  const backMat = new MeshPhysicalMaterial({
+    map: backTex,
+    roughness: 0.6,
+    metalness: 0,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.22,
+  });
 
   new TextureLoader().load(
     u("/images/hero/card-face.webp"),
@@ -87,14 +98,15 @@ export function createCard(scene, fx, castShadow) {
     }
   );
 
-  // BoxGeometry(1.6,.012,2.4): [+x, -x, +y (лице), -y (рубашка), +z, -z]
-  const mesh = new Mesh(new BoxGeometry(1.6, 0.012, 2.4), [side, side, faceMat, backMat, side, side]);
+  // BoxGeometry(1.6,.03,2.4): [+x, -x, +y (лице), -y (рубашка), +z, -z]
+  // Товщину піднято з 0.012: на такій відстані камери зріз у 0.012 не
+  // прочитувався, і картка виглядала наклеєним прямокутником.
+  //
+  // Латунний контур по ребрах прибрано свідомо. Він малював по картці
+  // різкий прямокутник — рівно те, через що сцена читалася як зроблена
+  // з коробочок. Край тепер тримає власна тінь і торець.
+  const mesh = new Mesh(new BoxGeometry(1.6, 0.03, 2.4), [side, side, faceMat, backMat, side, side]);
   mesh.castShadow = castShadow;
-  const edges = new LineSegments(
-    new EdgesGeometry(mesh.geometry),
-    new LineBasicMaterial({ color: 0xb9924a, transparent: true, opacity: 0.4 })
-  );
-  mesh.add(edges);
   mesh.visible = false;
   scene.add(mesh);
 
