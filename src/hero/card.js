@@ -4,17 +4,23 @@ import {
   BoxGeometry,
   CanvasTexture,
   Mesh,
+  MeshBasicMaterial,
   MeshPhysicalMaterial,
   MeshStandardMaterial,
+  PlaneGeometry,
   SRGBColorSpace,
   TextureLoader,
   Vector3,
 } from "three";
 import { easeSite, clamp01 } from "./easing.js";
+import { BOARD_TOP_Y, contactShadowTexture } from "./scene.js";
 import { u } from "../config/paths.js";
 
+const THICK = 0.03;
 const START = new Vector3(3.2, 2.8, 3.4);
-const END = new Vector3(2.1, 0.1, 1.4);
+// Висота рахується від верху поля, а не задається числом: коли товщину
+// поля міняли, картка з жорстко вписаною 0.1 опинилася втопленою в дошку.
+const END = new Vector3(2.1, BOARD_TOP_Y + THICK / 2, 1.4);
 
 // Якщо public/images/hero/card-face.webp не завантажилось — малюємо лице на
 // canvas. Тексту справжньої картки тут немає свідомо: вміст колоди не
@@ -24,23 +30,23 @@ function drawFaceFallback() {
   c.width = 320;
   c.height = 480;
   const ctx = c.getContext("2d");
-  ctx.fillStyle = "#0C161F";
+  ctx.fillStyle = "#F0EAD9";
   ctx.fillRect(0, 0, 320, 480);
   ctx.fillStyle = "#E8871E";
   ctx.fillRect(0, 0, 320, 8);
-  ctx.strokeStyle = "rgba(185,146,74,.6)";
+  ctx.strokeStyle = "rgba(92,69,23,.75)";
   ctx.lineWidth = 2;
   ctx.strokeRect(12, 20, 296, 448);
   ctx.textAlign = "center";
-  ctx.fillStyle = "#E8871E";
+  ctx.fillStyle = "#A65408";
   ctx.font = "500 13px 'JetBrains Mono', monospace";
   ctx.fillText("П О Д І Ї", 160, 70);
-  ctx.fillStyle = "#F4F4F0";
+  ctx.fillStyle = "#171C22";
   ctx.font = "900 30px Unbounded, system-ui, sans-serif";
   ctx.fillText("UNIONIZE", 160, 250);
-  ctx.fillStyle = "rgba(228,210,166,.6)";
+  ctx.fillStyle = "rgba(92,69,23,.7)";
   ctx.fillRect(130, 274, 60, 2);
-  ctx.fillStyle = "#8FA0AE";
+  ctx.fillStyle = "#6B6350";
   ctx.font = "400 12px 'JetBrains Mono', monospace";
   ctx.fillText("ПРМТУ", 160, 420);
   return new CanvasTexture(c);
@@ -63,23 +69,29 @@ function drawBack() {
 }
 
 export function createCard(scene, fx, castShadow) {
-  // Торець — зріз картону, тому теплий і матовий, як у поля.
-  const side = new MeshStandardMaterial({ color: 0x231C13, roughness: 0.9 });
+  // Зріз — світлий. У справжньої картки серцевина біла, і саме ця світла
+  // смужка по периметру відділяє її від фону. Темний торець зливався з
+  // синім центром поля, і картка губилася в текстурі.
+  const side = new MeshStandardMaterial({ color: 0xDCD3BC, roughness: 0.8, envMapIntensity: 0.25 });
   // Лице й рубашка лаковані — картка з колоди, а не аркуш паперу.
+  // Папір лише злегка лакований. На повній силі відблиск лампи забивав
+  // друк, і картка світилася білою плитою без тексту.
   const faceMat = new MeshPhysicalMaterial({
-    roughness: 0.55,
+    roughness: 0.62,
     metalness: 0,
-    clearcoat: 0.5,
-    clearcoatRoughness: 0.22,
+    clearcoat: 0.32,
+    clearcoatRoughness: 0.18,
+    envMapIntensity: 0.22,
   });
   const backTex = drawBack();
   backTex.colorSpace = SRGBColorSpace;
   const backMat = new MeshPhysicalMaterial({
     map: backTex,
-    roughness: 0.6,
+    roughness: 0.58,
     metalness: 0,
-    clearcoat: 0.5,
-    clearcoatRoughness: 0.22,
+    clearcoat: 0.45,
+    clearcoatRoughness: 0.14,
+    envMapIntensity: 0.35,
   });
 
   new TextureLoader().load(
@@ -105,27 +117,58 @@ export function createCard(scene, fx, castShadow) {
   // Латунний контур по ребрах прибрано свідомо. Він малював по картці
   // різкий прямокутник — рівно те, через що сцена читалася як зроблена
   // з коробочок. Край тепер тримає власна тінь і торець.
-  const mesh = new Mesh(new BoxGeometry(1.6, 0.03, 2.4), [side, side, faceMat, backMat, side, side]);
+  const mesh = new Mesh(new BoxGeometry(1.6, THICK, 2.4), [side, side, faceMat, backMat, side, side]);
   mesh.castShadow = castShadow;
   mesh.visible = false;
   scene.add(mesh);
+
+  // Власна тінь картки — той самий прийом, що й під кубиками. Без неї
+  // картка лежить у площині друку й читається як частина малюнка поля.
+  const shadow = new Mesh(
+    new PlaneGeometry(1, 1),
+    new MeshBasicMaterial({
+      map: contactShadowTexture(),
+      transparent: true,
+      depthWrite: false,
+      opacity: 0,
+    })
+  );
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.position.y = BOARD_TOP_Y + 0.003;
+  shadow.renderOrder = -1;
+  shadow.visible = false;
+  scene.add(shadow);
+
+  // Пляма тримає розмір картки й розповзається, поки та в польоті.
+  function updateShadow() {
+    if (!shadow.visible) return;
+    const h = Math.max(0, mesh.position.y - END.y);
+    const k = clamp01(h / 1.6);
+    shadow.position.x = mesh.position.x;
+    shadow.position.z = mesh.position.z;
+    shadow.scale.set(2.6 + k * 2.2, 3.4 + k * 2.2, 1);
+    shadow.material.opacity = 0.8 * (1 - k * 0.72);
+  }
 
   let anim = null; // { start } | null
   let bounceStart = -1;
 
   function flyIn(now, onLanded) {
     mesh.visible = true;
+    shadow.visible = true;
     anim = { start: now, onLanded };
   }
 
   function setLanded() {
     mesh.visible = true;
+    shadow.visible = true;
     mesh.position.copy(END);
     mesh.rotation.set(0, -0.16, 0);
     anim = null;
   }
 
   function update(now) {
+    updateShadow();
     if (bounceStart >= 0) {
       const t = clamp01((now - bounceStart) / 40);
       mesh.position.y = END.y + 0.02 * Math.sin(t * Math.PI);

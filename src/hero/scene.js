@@ -7,10 +7,12 @@ import {
   BoxGeometry,
   BufferAttribute,
   BufferGeometry,
+  CanvasTexture,
   Color,
   DirectionalLight,
   DoubleSide,
   EdgesGeometry,
+  EquirectangularReflectionMapping,
   FogExp2,
   Group,
   LineBasicMaterial,
@@ -24,6 +26,7 @@ import {
   PCFShadowMap,
   PerspectiveCamera,
   PlaneGeometry,
+  PMREMGenerator,
   PointLight,
   Points,
   PointsMaterial,
@@ -72,6 +75,57 @@ function makeTicks(count, rInner, material) {
   return new LineSegments(geo, material);
 }
 
+// М'яка пляма під предметом. Спільна для кубиків і картки: карта тіней
+// увімкнена лише на десктопі, а без плями предмет висить над полем.
+export function contactShadowTexture() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const ctx = c.getContext("2d");
+  const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  g.addColorStop(0, "rgba(0,0,0,.62)");
+  g.addColorStop(0.45, "rgba(0,0,0,.28)");
+  g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  return new CanvasTexture(c);
+}
+
+// Карта оточення. Світло від джерел дає лише розсіяне освітлення —
+// відблиску, у якому видно, ЩО саме відбивається, воно не дає. Тому
+// глянець читався як сірий наліт, а не як полірована поверхня.
+//
+// Замість готової кімнати з прикладів three малюємо власне оточення
+// однією смугою: тепла стеля з плямою лампи, темні стіни, чорна підлога.
+// Це рівно та кімната, у якій за задумом стоїть стіл, і вона не
+// висвітлює сцену чужим білим світлом.
+function makeEnvironment(renderer) {
+  const c = document.createElement("canvas");
+  c.width = 256;
+  c.height = 128;
+  const ctx = c.getContext("2d");
+  const g = ctx.createLinearGradient(0, 0, 0, 128);
+  g.addColorStop(0, "#FFF4DE");
+  g.addColorStop(0.3, "#2B3B4A");
+  g.addColorStop(0.62, "#0B141C");
+  g.addColorStop(1, "#04090E");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 256, 128);
+  const spot = ctx.createRadialGradient(96, 12, 0, 96, 12, 52);
+  spot.addColorStop(0, "rgba(255,247,228,1)");
+  spot.addColorStop(1, "rgba(255,247,228,0)");
+  ctx.fillStyle = spot;
+  ctx.fillRect(0, 0, 256, 64);
+
+  const tex = new CanvasTexture(c);
+  tex.mapping = EquirectangularReflectionMapping;
+  tex.colorSpace = SRGBColorSpace;
+  const pmrem = new PMREMGenerator(renderer);
+  const env = pmrem.fromEquirectangular(tex).texture;
+  pmrem.dispose();
+  tex.dispose();
+  return env;
+}
+
 export function createScene(canvas, profile) {
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: false });
   renderer.toneMapping = ACESFilmicToneMapping;
@@ -87,6 +141,9 @@ export function createScene(canvas, profile) {
   const scene = new Scene();
   scene.background = new Color(0x060c12);
   scene.fog = new FogExp2(0x060c12, 0.05);
+  // Сила відбиття задається кожному матеріалу окремо: поле має лишитись
+  // темним, а кубики — блищати.
+  scene.environment = makeEnvironment(renderer);
 
   const camera = new PerspectiveCamera(42, 1, 0.1, 80);
   camera.position.set(0, 6.4, 8.6);
@@ -95,7 +152,7 @@ export function createScene(canvas, profile) {
   // Підлога
   const floor = new Mesh(
     new PlaneGeometry(80, 80),
-    new MeshStandardMaterial({ color: 0x04090e, roughness: 0.95 })
+    new MeshStandardMaterial({ color: 0x04090e, roughness: 0.95, envMapIntensity: 0.12 })
   );
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -0.175;
@@ -106,7 +163,7 @@ export function createScene(canvas, profile) {
   // Торець теплий і матовий — це зріз картону, а не продовження фону.
   // Разом із потовщенням (0.18 → 0.34) він і дає полю вигляд предмета,
   // що лежить на столі, а не картинки, вкладеної в підлогу.
-  const edgeMat = () => new MeshStandardMaterial({ color: 0x231C13, roughness: 0.92 });
+  const edgeMat = () => new MeshStandardMaterial({ color: 0x231C13, roughness: 0.92, envMapIntensity: 0.25 });
   const boardMats = [
     edgeMat(), // +x
     edgeMat(), // -x
@@ -120,10 +177,11 @@ export function createScene(canvas, profile) {
       // Лак рахується на кожен піксель, а поле займає майже весь екран.
       // На телефоні беремо половину сили: відблиск лишається помітним,
       // а зайвого навантаження на фрагментний шейдер немає.
-      clearcoat: profile.mobile ? 0.22 : 0.42,
-      clearcoatRoughness: 0.24,
+      clearcoat: profile.mobile ? 0.3 : 0.55,
+      clearcoatRoughness: 0.14,
+      envMapIntensity: 0.3,
     }), // +y (верх, отримає текстуру)
-    new MeshStandardMaterial({ color: 0x04090e, roughness: 0.95 }), // -y
+    new MeshStandardMaterial({ color: 0x04090e, roughness: 0.95, envMapIntensity: 0.1 }), // -y
     edgeMat(), // +z
     edgeMat(), // -z
   ];

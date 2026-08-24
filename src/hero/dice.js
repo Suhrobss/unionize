@@ -1,7 +1,6 @@
 // Кубики: заокруглений корпус, крапки-геометрія, спрощена власна балістика,
 // гарантоване досідання в оголошену грань (завдання «3D-вступ» §3).
 import {
-  CanvasTexture,
   Mesh,
   MeshBasicMaterial,
   MeshPhysicalMaterial,
@@ -13,12 +12,12 @@ import {
 } from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { BOARD_TOP_Y } from "./scene.js";
+import { BOARD_TOP_Y, contactShadowTexture } from "./scene.js";
 import { easeOutCubic, clamp01 } from "./easing.js";
 
 const SIZE = 0.58;
 const HALF = SIZE / 2;
-const CORNER = 0.085;   // фаска — приблизно як у справжнього гральног кубика
+const CORNER = 0.072;   // фаска: досить, щоб не було прямого кута, і не «мило»
 const PIP_R = 0.046;
 const PIP_STEP = 0.145; // крок сітки крапок від центра грані
 
@@ -68,11 +67,14 @@ function pipGeometries() {
     const { u, v } = FACE_BASIS[value];
     for (const [gu, gv] of PIP_GRID[value]) {
       const g = proto.clone();
-      // 0.62 радіуса всередині корпусу: назовні виходить неглибока шапочка
+      // 0.7 радіуса всередині корпусу: назовні лишається пласка лінза.
+      // Глибший виступ читається як приклеєна намистина, мілкіший —
+      // як пляма фарби.
+      const d = HALF - PIP_R * 0.7;
       g.translate(
-        n.x * (HALF - PIP_R * 0.62) + u[0] * gu * PIP_STEP + v[0] * gv * PIP_STEP,
-        n.y * (HALF - PIP_R * 0.62) + u[1] * gu * PIP_STEP + v[1] * gv * PIP_STEP,
-        n.z * (HALF - PIP_R * 0.62) + u[2] * gu * PIP_STEP + v[2] * gv * PIP_STEP
+        n.x * d + u[0] * gu * PIP_STEP + v[0] * gv * PIP_STEP,
+        n.y * d + u[1] * gu * PIP_STEP + v[1] * gv * PIP_STEP,
+        n.z * d + u[2] * gu * PIP_STEP + v[2] * gv * PIP_STEP
       );
       // Одиниця — латунна. Той самий прийом, що й червона одиниця на
       // класичних кубиках: одна грань відрізняється, і кидок читається.
@@ -81,23 +83,6 @@ function pipGeometries() {
   }
   proto.dispose();
   return { dark: mergeGeometries(dark), brass: mergeGeometries(brass) };
-}
-
-// Контактна тінь — м'яка пляма під кубиком.
-// Карта тіней увімкнена лише на десктопі, тож на телефоні кубики без неї
-// висіли б над полем. Пляма коштує один прозорий чотирикутник і працює
-// скрізь однаково, а на десктопі ще й підсилює дотик до поверхні.
-function contactShadowTexture() {
-  const c = document.createElement("canvas");
-  c.width = c.height = 128;
-  const ctx = c.getContext("2d");
-  const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-  g.addColorStop(0, "rgba(0,0,0,.62)");
-  g.addColorStop(0.45, "rgba(0,0,0,.28)");
-  g.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 128, 128);
-  return new CanvasTexture(c);
 }
 
 const UP = new Vector3(0, 1, 0);
@@ -117,15 +102,34 @@ export function createDice(scene, fx, castShadow) {
   const pips = pipGeometries();
   // Кістяна смола з тонким лаком: clearcoat дає вузький відблиск поверх
   // матової основи. Без нього кубик виглядає пластиковою заготовкою.
+  // Полірована кістяна смола. Головне тут — clearcoatRoughness: широкий
+  // м'який відблиск читався як сірий наліт, вузький читається як лак.
   const bodyMat = new MeshPhysicalMaterial({
-    color: 0xF2EAD6,
-    roughness: 0.42,
+    color: 0xF6F0E2,
+    roughness: 0.3,
+    metalness: 0,
+    clearcoat: 0.95,
+    clearcoatRoughness: 0.07,
+    envMapIntensity: 0.9,
+  });
+  // Крапки теж глянцеві: матова чорна пляма виглядає намальованою,
+  // глянцева ловить ту саму лампу, що й корпус, і стає заливкою в лунці.
+  // Лак на крапках тримаємо стриманим: на повній силі відбиття лампи
+  // забивало чорну заливку, і крапки сіріли до ледь помітних плям.
+  const pipMat = new MeshPhysicalMaterial({
+    color: 0x0A1017,
+    roughness: 0.26,
     metalness: 0,
     clearcoat: 0.55,
-    clearcoatRoughness: 0.3,
+    clearcoatRoughness: 0.1,
+    envMapIntensity: 0.45,
   });
-  const pipMat = new MeshStandardMaterial({ color: 0x141A22, roughness: 0.34, metalness: 0.05 });
-  const pipBrassMat = new MeshStandardMaterial({ color: 0xB9924A, roughness: 0.3, metalness: 0.65 });
+  const pipBrassMat = new MeshStandardMaterial({
+    color: 0xC9A253,
+    roughness: 0.19,
+    metalness: 0.95,
+    envMapIntensity: 1.3,
+  });
 
   const shadowGeo = new PlaneGeometry(1, 1);
   const shadowTex = contactShadowTexture();
